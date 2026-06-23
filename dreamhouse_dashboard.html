@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서울시 주거편의 지원사업 업무현황판</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f7f4; color: #1a1a18; min-height: 100vh; padding: 20px; }
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  .header { margin-bottom: 16px; }
+  .title { font-size: 17px; font-weight: 500; color: #1a1a18; }
+  .date-line { font-size: 12px; color: #888780; margin-top: 3px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat-card { background: #fff; border: 0.5px solid #e0ded8; border-radius: 10px; padding: 12px 14px; }
+  .stat-num { font-size: 22px; font-weight: 500; color: #1a1a18; }
+  .stat-lbl { font-size: 11px; color: #888780; margin-top: 2px; }
+  .card { background: #fff; border: 0.5px solid #e0ded8; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .card-label { font-size: 10px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .month-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .month-box { border-radius: 6px; padding: 7px 2px; text-align: center; cursor: pointer; transition: opacity 0.1s; }
+  .month-box:hover { opacity: 0.75; }
+  .month-name { font-size: 10px; font-weight: 500; display: block; }
+  .month-dot { width: 4px; height: 4px; border-radius: 50%; margin: 3px auto 0; }
+  .m-done { background: #f1efe8; }
+  .m-done .month-name { color: #888780; }
+  .m-done .month-dot { background: #b4b2a9; }
+  .m-now { background: #e1f5ee; border: 1.5px solid #1D9E75; }
+  .m-now .month-name { color: #0f6e56; font-weight: 600; }
+  .m-now .month-dot { background: #1D9E75; }
+  .m-upcoming { background: #f8f7f4; }
+  .m-upcoming .month-name { color: #c5c3ba; }
+  .m-upcoming .month-dot { background: #dedad3; }
+  .m-selected { outline: 2px solid #378ADD; outline-offset: 1px; }
+  .progress-bar { height: 4px; background: #f1efe8; border-radius: 99px; margin: 10px 0 5px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #1D9E75; border-radius: 99px; }
+  .progress-label { font-size: 11px; color: #888780; }
+  .phase-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 99px; margin-bottom: 6px; }
+  .badge-now { background: #e1f5ee; color: #0f6e56; }
+  .badge-past { background: #f1efe8; color: #5f5e5a; }
+  .badge-upcoming { background: #e6f1fb; color: #185fa5; }
+  .phase-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .view-hint { font-size: 11px; color: #aaa; margin-bottom: 14px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .task-list { list-style: none; }
+  .task-item { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 0.5px solid #f1efe8; }
+  .task-item:last-child { border-bottom: none; }
+  .task-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .dot-done { background: #b4b2a9; }
+  .dot-now { background: #1D9E75; }
+  .dot-upcoming { background: #378ADD; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-text { font-size: 13px; color: #1a1a18; line-height: 1.45; }
+  .task-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+  .task-sub.urgent { color: #0f6e56; }
+
+  /* 링크 있는 항목 스타일 */
+  .task-link { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 0.5px solid #f1efe8; text-decoration: none; color: inherit; border-radius: 6px; margin: 0 -6px; padding-left: 6px; padding-right: 6px; cursor: pointer; }
+  .task-link:last-child { border-bottom: none; }
+  .task-link:hover { background: #f8f7f4; }
+  .task-link:hover .task-text { color: #185fa5; }
+  .task-arrow { font-size: 10px; color: #c5c3ba; margin-top: 6px; flex-shrink: 0; opacity: 0; }
+  .task-link:hover .task-arrow { opacity: 1; }
+
+  .divider-label { padding: 8px 0 4px; font-size: 10px; font-weight: 500; color: #aaa; letter-spacing: 0.08em; text-transform: uppercase; border-top: 0.5px solid #f1efe8; margin-top: 4px; display: block; }
+  .notion-links { display: flex; flex-direction: column; gap: 5px; }
+  .notion-link { display: flex; align-items: center; gap: 9px; padding: 9px 11px; background: #f8f7f4; border: 0.5px solid #e0ded8; border-radius: 8px; text-decoration: none; color: #1a1a18; font-size: 13px; }
+  .notion-link:hover { background: #f1efe8; }
+  .notion-link.active { border-color: #1D9E75; background: #e1f5ee; }
+  .current-tag { font-size: 10px; background: #1D9E75; color: #fff; padding: 2px 7px; border-radius: 99px; margin-left: 4px; }
+  .link-arrow { margin-left: auto; color: #b4b2a9; font-size: 12px; }
+</style>
+</head>
+<body>
+<h2 class="sr-only">서울시 주거편의 지원사업 업무현황판</h2>
+
+<div class="header">
+  <div class="title">서울시 주거편의 지원사업 업무현황판</div>
+  <div class="date-line" id="dateDisplay"></div>
+</div>
+
+<div id="phaseBadge"></div>
+<div class="stat-grid" id="statGrid"></div>
+
+<div class="card">
+  <div class="card-label">연간 타임라인 <span style="font-size:10px;color:#aaa;text-transform:none;letter-spacing:0;font-weight:400;">— 월을 클릭하면 해당 시기 업무를 볼 수 있어요</span></div>
+  <div class="month-grid" id="monthGrid"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel"></div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-label" id="doneLabel">완료되어 있어야 할 것</div>
+    <ul class="task-list" id="doneList"></ul>
+  </div>
+  <div class="card">
+    <div class="card-label" id="nowLabel">지금 해야 할 일</div>
+    <ul class="task-list" id="nowList"></ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-label">인수인계서 바로가기</div>
+  <div class="notion-links" id="notionLinks"></div>
+</div>
+
+<script>
+var N = {
+  p01: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77',
+  p02: 'https://notion.so/38103cfe058d81418817f2daf0790ccf',
+  p03: 'https://notion.so/38103cfe058d814da40bff8366669d4f',
+  p04: 'https://notion.so/38103cfe058d81ecaf70c71bfc46a640',
+  p05: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6',
+  p06: 'https://notion.so/38103cfe058d81b98c5ee6b2b88fbe3e',
+  p07: 'https://notion.so/38103cfe058d8196a946c83a598a0ca1'
+};
+
+var MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+var PHASES = [
+  {
+    id:'prep', label:'사업 준비', months:[1], notionPageId:null,
+    doneTasks:[],
+    nowTasks:[
+      {text:'전년도 결과보고서 정리 확인', sub:'1월 중', url:N.p05},
+      {text:'당해 연도 서울시 사업계획서 검토', sub:'1월 중', url:null},
+      {text:'서울시 보조금 교부 일정 확인', sub:'1월 중', url:null},
+      {text:'담당 인력·자문단 명단 업데이트', sub:'사업 착수 전', url:null}
+    ],
+    upcomingTasks:[
+      {text:'유관기관 홍보·협조 공문 발송', sub:'2월 1주차', url:N.p02},
+      {text:'시공업체 모집 공고 개시', sub:'2월 1주차', url:N.p04}
+    ]
+  },
+  {
+    id:'recruit', label:'홍보·접수·시공업체 모집', months:[2,3], notionPageId:'38103cfe058d81418817f2daf0790ccf',
+    doneTasks:[
+      {text:'당해 연도 사업계획서 검토 완료', sub:'1월', url:null},
+      {text:'담당 인력·자문단 명단 업데이트', sub:'1월', url:null}
+    ],
+    nowTasks:[
+      {text:'유관기관 홍보·협조 공문 발송', sub:'2월 1주차', urgent:true, url:N.p02},
+      {text:'시공업체 모집 공고 게시', sub:'2월 1주차', urgent:true, url:N.p04},
+      {text:'대상자 모집 공고 개시', sub:'2월~3월', url:N.p02},
+      {text:'시공업체 서류심사 및 면접', sub:'2월 4주차', url:N.p04},
+      {text:'전문가 자문단 위촉 완료', sub:'3월 중', url:null},
+      {text:'대상자 신청서류 취합 마감', sub:'3월 말~4월 초', url:N.p02}
+    ],
+    upcomingTasks:[
+      {text:'현장심사 일정 조율', sub:'4월 1주차', url:N.p03},
+      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', url:N.p03}
+    ]
+  },
+  {
+    id:'field', label:'현장심사', months:[4], notionPageId:'38103cfe058d814da40bff8366669d4f',
+    doneTasks:[
+      {text:'유관기관 홍보·협조 공문 발송 완료', sub:'2월', url:N.p02},
+      {text:'시공업체 선발 완료', sub:'2월 말', url:N.p04},
+      {text:'대상자 신청서류 취합 마감', sub:'3월 말~4월 초', url:N.p02},
+      {text:'전문가 자문단 위촉 완료', sub:'3월', url:null}
+    ],
+    nowTasks:[
+      {text:'현장심사 일정 조율 (가구별 예약)', sub:'4월 1주차', urgent:true, url:N.p03},
+      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', urgent:true, url:N.p03},
+      {text:'가구별 시공견적 산출', sub:'4월 말', urgent:true, url:N.p03}
+    ],
+    upcomingTasks:[
+      {text:'심사자료 작성 (점수 합산)', sub:'5월 1~2주차', url:N.p03},
+      {text:'최종 선정심사 회의', sub:'5월 셋째주', url:N.p03}
+    ]
+  },
+  {
+    id:'select', label:'최종 선정', months:[5], notionPageId:'38103cfe058d814da40bff8366669d4f',
+    doneTasks:[
+      {text:'유관기관 홍보·협조 공문 발송 완료', sub:'2월', url:N.p02},
+      {text:'시공업체 선발 완료', sub:'2월 말', url:N.p04},
+      {text:'대상자 신청서류 취합 마감', sub:'3월 말~4월 초', url:N.p02},
+      {text:'전체 신청 가구 현장심사 완료', sub:'4월', url:N.p03},
+      {text:'가구별 시공견적 산출 완료', sub:'4월 말', url:N.p03}
+    ],
+    nowTasks:[
+      {text:'심사자료 작성 — 서류+현장 점수 합산', sub:'5월 1~2주차', urgent:true, url:N.p03},
+      {text:'최종 선정심사 회의', sub:'5월 셋째주', urgent:true, url:N.p03},
+      {text:'선정 결과 통보 (대상가구 개별 통지)', sub:'심사 후', url:N.p03}
+    ],
+    upcomingTasks:[
+      {text:'시공업체 계약 체결', sub:'6월 중', url:N.p04},
+      {text:'선정 가구 시공 일정 조율', sub:'6월', url:N.p05}
+    ]
+  },
+  {
+    id:'contract', label:'계약·시공 시작', months:[6], notionPageId:'38103cfe058d81ecaf70c71bfc46a640',
+    doneTasks:[
+      {text:'시공업체 선발 완료', sub:'2월 말', url:N.p04},
+      {text:'전체 신청 가구 현장심사 완료', sub:'4월', url:N.p03},
+      {text:'최종 선정심사 및 결과 통보 완료', sub:'5월', url:N.p03}
+    ],
+    nowTasks:[
+      {text:'시공업체 계약 체결', sub:'6월 중', urgent:true, url:N.p04},
+      {text:'선정 가구 시공 일정 조율·안내', sub:'6월 말까지', urgent:true, url:N.p05},
+      {text:'가구별 시공 내역 교차검증', sub:'시공 시작 전', url:N.p05},
+      {text:'시공 시작', sub:'6월 말', url:N.p05}
+    ],
+    upcomingTasks:[
+      {text:'시공 현장 감리', sub:'7~10월', url:N.p05},
+      {text:'자재 적정성 확인', sub:'시공 중', url:N.p05}
+    ]
+  },
+  {
+    id:'construction', label:'시공 진행·감리', months:[7,8,9], notionPageId:'38103cfe058d818bba85ed13f041b2b6',
+    doneTasks:[
+      {text:'시공업체 선발 및 계약 완료', sub:'2~6월', url:N.p04},
+      {text:'최종 선정 및 결과 통보 완료', sub:'5월', url:N.p03},
+      {text:'시공 시작 완료', sub:'6월', url:N.p05}
+    ],
+    nowTasks:[
+      {text:'시공 현장 감리 (건축사사무소 PM)', sub:'매주 현장 확인', urgent:true, url:N.p05},
+      {text:'자재 적정성 확인 (사전 승인 자재 여부)', sub:'시공 중', url:N.p05},
+      {text:'진행 상황 촬영 (중간 과정 사진 필수)', sub:'시공 중', url:N.p05},
+      {text:'문제 발생 시 즉시 사무국 보고', sub:'상시', url:N.p05}
+    ],
+    upcomingTasks:[
+      {text:'시공 완료 가구 품질검사', sub:'10~11월', url:N.p05},
+      {text:'하자 발견 시 보완 공사', sub:'10~11월', url:N.p05}
+    ]
+  },
+  {
+    id:'quality', label:'품질검사·하자보수', months:[10,11], notionPageId:'38103cfe058d818bba85ed13f041b2b6',
+    doneTasks:[
+      {text:'시공업체 선발 및 계약 완료', sub:'2~6월', url:N.p04},
+      {text:'최종 선정 및 결과 통보 완료', sub:'5월', url:N.p03},
+      {text:'시공 진행 및 감리 완료', sub:'6~10월', url:N.p05}
+    ],
+    nowTasks:[
+      {text:'시공 완료 가구 전체 품질검사', sub:'전 가구 — 누락 없이', urgent:true, url:N.p05},
+      {text:'하자 발견 시 보완 공사 지시', sub:'즉시 처리', url:N.p05},
+      {text:'대상자 완료 확인 서명 수령', sub:'품질검사 완료 후', url:N.p06},
+      {text:'만족도 조사 (ADL·IADL)', sub:'시공 전·후 비교', url:N.p05}
+    ],
+    upcomingTasks:[
+      {text:'결과보고서 작성 및 서울시 제출', sub:'12월', url:N.p05},
+      {text:'결과보고 책자 제작', sub:'12월', url:N.p05}
+    ]
+  },
+  {
+    id:'report', label:'결과보고', months:[12], notionPageId:'38103cfe058d818bba85ed13f041b2b6',
+    doneTasks:[
+      {text:'시공 및 품질검사 전 가구 완료', sub:'6~11월', url:N.p05},
+      {text:'만족도 조사 완료', sub:'10~11월', url:N.p05}
+    ],
+    nowTasks:[
+      {text:'결과보고서 작성 및 서울시 제출', sub:'12월 중', urgent:true, url:N.p05},
+      {text:'만족도 조사 결과 분석 (ADL·IADL)', sub:'12월', url:N.p05},
+      {text:'결과보고 책자 제작', sub:'12월', url:N.p05}
+    ],
+    upcomingTasks:[]
+  }
+];
+
+var NOTION_PAGES = [
+  {label:'01. 업무 일정', id:'38103cfe058d81828aa0f4591d9a9f77'},
+  {label:'02. 홍보 및 접수', id:'38103cfe058d81418817f2daf0790ccf'},
+  {label:'03. 현장심사 및 대상자 선정', id:'38103cfe058d814da40bff8366669d4f'},
+  {label:'04. 시공업체 선정', id:'38103cfe058d81ecaf70c71bfc46a640'},
+  {label:'05. 시공 및 품질관리', id:'38103cfe058d818bba85ed13f041b2b6'},
+  {label:'06. 필요 서류 목록', id:'38103cfe058d81b98c5ee6b2b88fbe3e'},
+  {label:'07. 서류 작성 예시', id:'38103cfe058d8196a946c83a598a0ca1'}
+];
+
+var today = new Date();
+var currentMonth = today.getMonth() + 1;
+var selectedMonth = currentMonth;
+
+function getPhase(m) {
+  for (var i=0;i<PHASES.length;i++) if (PHASES[i].months.indexOf(m)!==-1) return PHASES[i];
+  return null;
+}
+
+function taskHtml(t, dotCls, isUpcoming) {
+  var subCls = (!isUpcoming && t.urgent) ? ' urgent' : '';
+  var textStyle = isUpcoming ? 'font-size:12px;color:#555;' : '';
+  if (t.url) {
+    return '<li><a href="' + t.url + '" target="_blank" class="task-link">' +
+      '<div class="task-dot ' + dotCls + '"></div>' +
+      '<div class="task-body"><div class="task-text" style="' + textStyle + '">' + t.text + '</div>' +
+      '<div class="task-sub' + subCls + '">' + t.sub + '</div></div>' +
+      '<div class="task-arrow">↗</div></a></li>';
+  }
+  return '<li class="task-item"><div class="task-dot ' + dotCls + '"></div>' +
+    '<div class="task-body"><div class="task-text" style="' + textStyle + '">' + t.text + '</div>' +
+    '<div class="task-sub' + subCls + '">' + t.sub + '</div></div></li>';
+}
+
+function render(viewMonth) {
+  var phase = getPhase(viewMonth);
+  var isPast = viewMonth < currentMonth;
+  var isNow = viewMonth === currentMonth;
+
+  // Badge
+  var badgeEl = document.getElementById('phaseBadge');
+  if (phase) {
+    var bc = isNow ? 'badge-now' : isPast ? 'badge-past' : 'badge-upcoming';
+    var dot = isNow ? '<div class="phase-dot"></div>' : '';
+    var sfx = isNow ? ' 진행 중' : isPast ? ' (완료)' : ' (예정)';
+    var hint = (!isNow) ? '<div class="view-hint">📅 ' + viewMonth + '월 기준으로 보는 중 — <a href="#" onclick="resetToToday();return false;" style="color:#378ADD;text-decoration:none;">오늘로 돌아가기</a></div>' : '';
+    badgeEl.innerHTML = '<div class="phase-badge ' + bc + '">' + dot + viewMonth + '월 · ' + phase.label + sfx + '</div>' + hint;
+  }
+
+  // Done
+  document.getElementById('doneLabel').textContent = isPast ? (viewMonth + '월 이전 완료 항목') : '완료되어 있어야 할 것';
+  var dEl = document.getElementById('doneList');
+  if (phase && phase.doneTasks.length > 0) {
+    var h = '';
+    phase.doneTasks.forEach(function(t){ h += taskHtml(t, 'dot-done', false); });
+    dEl.innerHTML = h;
+  } else {
+    dEl.innerHTML = '<li style="padding:8px 0;font-size:13px;color:#888780;">사업 시작 단계입니다</li>';
+  }
+
+  // Now
+  document.getElementById('nowLabel').textContent = isPast ? (viewMonth + '월 주요 업무') : isNow ? '지금 해야 할 일' : (viewMonth + '월 예정 업무');
+  var nEl = document.getElementById('nowList');
+  if (phase) {
+    var dotCls = isPast ? 'dot-done' : isNow ? 'dot-now' : 'dot-upcoming';
+    var nh = '';
+    phase.nowTasks.forEach(function(t){ nh += taskHtml(t, dotCls, false); });
+    if (!isPast && phase.upcomingTasks && phase.upcomingTasks.length > 0) {
+      nh += '<li><span class="divider-label">다음 단계 예고</span></li>';
+      phase.upcomingTasks.forEach(function(t){ nh += taskHtml(t, 'dot-upcoming', true); });
+    }
+    nEl.innerHTML = nh;
+  }
+
+  // Notion links
+  var lh = '';
+  NOTION_PAGES.forEach(function(p){
+    var active = phase && phase.notionPageId === p.id;
+    lh += '<a href="https://notion.so/' + p.id + '" target="_blank" class="notion-link' + (active?' active':'') + '">' +
+      '<span>📋</span><span>' + p.label + '</span>' +
+      (active ? '<span class="current-tag">관련</span>' : '') +
+      '<span class="link-arrow">↗</span></a>';
+  });
+  document.getElementById('notionLinks').innerHTML = lh;
+}
+
+function renderMonthGrid() {
+  var h = '';
+  for (var m=0;m<12;m++) {
+    var n = m+1;
+    var cls = n===currentMonth ? 'm-now' : n<currentMonth ? 'm-done' : 'm-upcoming';
+    var sel = n===selectedMonth ? ' m-selected' : '';
+    h += '<div class="month-box '+cls+sel+'" onclick="selectMonth('+n+')" title="'+n+'월 업무 보기"><span class="month-name">'+MONTHS[m]+'</span><div class="month-dot"></div></div>';
+  }
+  document.getElementById('monthGrid').innerHTML = h;
+}
+
+function selectMonth(m) {
+  selectedMonth = m;
+  renderMonthGrid();
+  render(m);
+}
+
+function resetToToday() { selectMonth(currentMonth); }
+
+function init() {
+  today = new Date();
+  currentMonth = today.getMonth() + 1;
+  selectedMonth = currentMonth;
+
+  document.getElementById('dateDisplay').textContent =
+    today.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'}) + ' 기준 자동 계산';
+
+  var cp = getPhase(currentMonth);
+  var cIdx = -1;
+  for (var i=0;i<PHASES.length;i++) if (PHASES[i].months.indexOf(currentMonth)!==-1){cIdx=i;break;}
+
+  document.getElementById('statGrid').innerHTML =
+    '<div class="stat-card"><div class="stat-num">'+(cIdx>=0?cIdx:0)+'</div><div class="stat-lbl">완료된 단계</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#1D9E75;">'+(cp?1:0)+'</div><div class="stat-lbl">현재 진행 중</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:#378ADD;">'+(cIdx>=0?PHASES.length-cIdx-1:PHASES.length)+'</div><div class="stat-lbl">남은 단계</div></div>';
+
+  var pct = Math.round(((currentMonth-1)/11)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = '연간 진행률 '+pct+'%';
+
+  renderMonthGrid();
+  render(currentMonth);
+}
+
+init();
+</script>
+</body>
+</html>
