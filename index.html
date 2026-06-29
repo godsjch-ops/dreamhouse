@@ -66,11 +66,15 @@
 
   .divider-label { padding: 8px 0 4px; font-size: 10px; font-weight: 500; color: #aaa; letter-spacing: 0.08em; text-transform: uppercase; border-top: 0.5px solid #f1efe8; margin-top: 4px; display: block; }
   .notion-links { display: flex; flex-direction: column; gap: 5px; }
-  .notion-link { display: flex; align-items: center; gap: 9px; padding: 9px 11px; background: #f8f7f4; border: 0.5px solid #e0ded8; border-radius: 8px; text-decoration: none; color: #1a1a18; font-size: 13px; }
-  .notion-link:hover { background: #f1efe8; }
-  .notion-link.active { border-color: #1D9E75; background: #e1f5ee; }
-  .current-tag { font-size: 10px; background: #1D9E75; color: #fff; padding: 2px 7px; border-radius: 99px; margin-left: 4px; }
-  .link-arrow { margin-left: auto; color: #b4b2a9; font-size: 12px; }
+  .notion-link-row { display: flex; align-items: center; gap: 6px; padding: 8px 11px; background: #f8f7f4; border: 0.5px solid #e0ded8; border-radius: 8px; }
+  .notion-link-row.active { border-color: #1D9E75; background: #e1f5ee; }
+  .notion-link-title { flex: 1; font-size: 13px; color: #1a1a18; display: flex; align-items: center; gap: 6px; }
+  .current-tag { font-size: 10px; background: #1D9E75; color: #fff; padding: 2px 7px; border-radius: 99px; }
+  .link-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 9px; border-radius: 6px; text-decoration: none; white-space: nowrap; font-weight: 500; }
+  .btn-notion { background: #f1efe8; color: #5f5e5a; border: 0.5px solid #e0ded8; }
+  .btn-notion:hover { background: #e0ded8; }
+  .btn-github { background: #1a1a18; color: #fff; }
+  .btn-github:hover { background: #444; }
 </style>
 </head>
 <body>
@@ -275,14 +279,15 @@ var PHASES = [
   }
 ];
 
+var GH = 'https://github.com/godsjch-ops/dreamhouse/blob/main/';
 var NOTION_PAGES = [
-  {label:'01. 업무 일정', id:'38103cfe058d81828aa0f4591d9a9f77'},
-  {label:'02. 홍보 및 접수', id:'38103cfe058d81418817f2daf0790ccf'},
-  {label:'03. 현장심사 및 대상자 선정', id:'38103cfe058d814da40bff8366669d4f'},
-  {label:'04. 시공업체 선정', id:'38103cfe058d81ecaf70c71bfc46a640'},
-  {label:'05. 시공 및 품질관리', id:'38103cfe058d818bba85ed13f041b2b6'},
-  {label:'06. 필요 서류 목록', id:'38103cfe058d81b98c5ee6b2b88fbe3e'},
-  {label:'07. 서류 작성 예시', id:'38103cfe058d8196a946c83a598a0ca1'}
+  {label:'01. 업무 일정', id:'38103cfe058d81828aa0f4591d9a9f77', gh:'01_%EC%97%85%EB%AC%B4%EC%9D%BC%EC%A0%95.md'},
+  {label:'02. 홍보 및 접수', id:'38103cfe058d81418817f2daf0790ccf', gh:'02_%ED%99%8D%EB%B3%B4%EB%B0%8F%EC%A0%91%EC%88%98.md'},
+  {label:'03. 현장심사 및 대상자 선정', id:'38103cfe058d814da40bff8366669d4f', gh:'03_%ED%98%84%EC%9E%A5%EC%8B%AC%EC%82%AC%EB%B0%8F%EB%8C%80%EC%83%81%EC%9E%90%EC%84%A0%EC%A0%95.md'},
+  {label:'04. 시공업체 선정', id:'38103cfe058d81ecaf70c71bfc46a640', gh:'04_%EC%8B%9C%EA%B3%B5%EC%97%85%EC%B2%B4%EC%84%A0%EC%A0%95.md'},
+  {label:'05. 시공 및 품질관리', id:'38103cfe058d818bba85ed13f041b2b6', gh:'05_%EC%8B%9C%EA%B3%B5%EB%B0%8F%ED%92%88%EC%A7%88%EA%B4%80%EB%A6%AC.md'},
+  {label:'06. 필요 서류 목록', id:'38103cfe058d81b98c5ee6b2b88fbe3e', gh:'06_%ED%95%84%EC%9A%94%EC%84%9C%EB%A5%98%EB%AA%A9%EB%A1%9D.md'},
+  {label:'07. 서류 작성 예시', id:'38103cfe058d8196a946c83a598a0ca1', gh:'07_%EC%84%9C%EB%A5%98%EC%9E%91%EC%84%B1%EC%98%88%EC%8B%9C.md'}
 ];
 
 var today = new Date();
@@ -349,14 +354,16 @@ function render(viewMonth) {
     nEl.innerHTML = nh;
   }
 
-  // Notion links
+  // Notion + GitHub links
   var lh = '';
   NOTION_PAGES.forEach(function(p){
     var active = phase && phase.notionPageId === p.id;
-    lh += '<a href="https://notion.so/' + p.id + '" target="_blank" class="notion-link' + (active?' active':'') + '">' +
-      '<span>📋</span><span>' + p.label + '</span>' +
-      (active ? '<span class="current-tag">관련</span>' : '') +
-      '<span class="link-arrow">↗</span></a>';
+    lh += '<div class="notion-link-row' + (active?' active':'') + '">' +
+      '<div class="notion-link-title"><span>📋</span><span>' + p.label + '</span>' +
+      (active ? '<span class="current-tag">관련</span>' : '') + '</div>' +
+      '<a href="https://notion.so/' + p.id + '" target="_blank" class="link-btn btn-notion">노션 ↗</a>' +
+      '<a href="' + GH + p.gh + '" target="_blank" class="link-btn btn-github">MD ↗</a>' +
+      '</div>';
   });
   document.getElementById('notionLinks').innerHTML = lh;
 }
