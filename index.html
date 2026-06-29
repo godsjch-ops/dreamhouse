@@ -75,6 +75,45 @@
   .btn-notion:hover { background: #e0ded8; }
   .btn-github { background: #1a1a18; color: #fff; }
   .btn-github:hover { background: #444; }
+
+  /* 상세 패널 */
+  .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .panel-overlay.open { opacity: 1; pointer-events: all; }
+  .detail-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); background: #fff; border-left: 0.5px solid #e0ded8; z-index: 101; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; display: flex; flex-direction: column; }
+  .detail-panel.open { transform: translateX(0); }
+  .panel-header { padding: 16px 16px 12px; border-bottom: 0.5px solid #f1efe8; display: flex; align-items: flex-start; gap: 10px; position: sticky; top: 0; background: #fff; z-index: 1; }
+  .panel-title { flex: 1; font-size: 14px; font-weight: 500; color: #1a1a18; line-height: 1.4; }
+  .panel-month { font-size: 11px; color: #888780; margin-top: 3px; }
+  .panel-close { width: 28px; height: 28px; border: none; background: #f1efe8; border-radius: 6px; cursor: pointer; font-size: 14px; color: #5f5e5a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .panel-close:hover { background: #e0ded8; }
+  .panel-body { padding: 14px 16px; flex: 1; }
+  .panel-summary { font-size: 13px; color: #444441; line-height: 1.6; background: #f8f7f4; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
+  .panel-section { margin-bottom: 14px; }
+  .panel-section-title { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+  .panel-section-title::after { content: ''; flex: 1; height: 0.5px; background: #f1efe8; }
+  .panel-steps { list-style: none; counter-reset: step; }
+  .panel-steps li { display: flex; gap: 8px; font-size: 12.5px; color: #1a1a18; padding: 5px 0; border-bottom: 0.5px solid #f8f7f4; line-height: 1.45; }
+  .panel-steps li::before { counter-increment: step; content: counter(step); min-width: 18px; height: 18px; background: #1D9E75; color: #fff; border-radius: 50%; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .panel-checks { list-style: none; }
+  .panel-checks li { display: flex; gap: 8px; font-size: 12.5px; color: #1a1a18; padding: 5px 0; border-bottom: 0.5px solid #f8f7f4; line-height: 1.45; }
+  .panel-checks li::before { content: '□'; font-size: 13px; color: #b4b2a9; flex-shrink: 0; }
+  .panel-info { list-style: none; }
+  .panel-info li { font-size: 12.5px; color: #1a1a18; padding: 4px 0 4px 10px; border-left: 2px solid #e0ded8; margin-bottom: 4px; line-height: 1.45; }
+  .panel-warns { list-style: none; }
+  .panel-warns li { display: flex; gap: 7px; font-size: 12px; color: #854f0b; padding: 5px 8px; background: #faeeda; border-radius: 6px; margin-bottom: 4px; line-height: 1.45; }
+  .panel-warns li::before { content: '⚠'; flex-shrink: 0; }
+  .panel-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .panel-table th { background: #f8f7f4; color: #5f5e5a; font-weight: 500; padding: 6px 8px; text-align: left; border-bottom: 0.5px solid #e0ded8; }
+  .panel-table td { padding: 5px 8px; border-bottom: 0.5px solid #f1efe8; color: #1a1a18; }
+  .panel-footer { padding: 12px 16px; border-top: 0.5px solid #f1efe8; display: flex; gap: 8px; position: sticky; bottom: 0; background: #fff; }
+  .panel-footer a { flex: 1; text-align: center; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 500; text-decoration: none; }
+  .pf-notion { background: #f1efe8; color: #5f5e5a; border: 0.5px solid #e0ded8; }
+  .pf-notion:hover { background: #e0ded8; }
+  .task-detail-btn { cursor: pointer; }
+  .task-detail-btn:hover { background: #f8f7f4; border-radius: 6px; }
+  .task-detail-btn:hover .task-text { color: #1D9E75; }
+  .detail-arrow { font-size: 10px; color: #c5c3ba; margin-top: 6px; flex-shrink: 0; }
+  .task-detail-btn:hover .detail-arrow { color: #1D9E75; }
 </style>
 </head>
 <body>
@@ -129,12 +168,12 @@ var PHASES = [
     id:'prep', label:'사업 준비', months:[1], notionPageId:'38103cfe058d81828aa0f4591d9a9f77',
     doneTasks:[],
     nowTasks:[
-      {text:'전문감사인 회계감사 진행', sub:'1월 중 — 서울시 지정 감사인', url:N.p01},
-      {text:'보탬e 실적보고서·정산보고서 서울시 제출', sub:'1월 3주 이내', url:N.p01},
-      {text:'서울시 공모 신청서류 준비 및 제출', sub:'1월 16~20일 방문접수 (출력 15부+USB)', url:N.p01},
-      {text:'당해 연도 서울시 사업계획서 검토', sub:'1월 중', url:N.p01},
-      {text:'담당 인력·자문단 명단 업데이트', sub:'사업 착수 전', url:null},
-      {text:'2월 사업공고 자료 사전 준비', sub:'포스터·현수막 초안 + 25개 구 담당자 최신화', url:N.p01}
+      {text:'전문감사인 회계감사 진행', sub:'1월 중 — 서울시 지정 감사인', url:N.p01, key:'audit'},
+      {text:'보탬e 실적보고서·정산보고서 서울시 제출', sub:'1월 3주 이내', url:N.p01, key:'bhtm_submit'},
+      {text:'서울시 공모 신청서류 준비 및 제출', sub:'1월 16~20일 방문접수 (출력 15부+USB)', url:N.p01, key:'contest_apply'},
+      {text:'당해 연도 서울시 사업계획서 검토', sub:'1월 중', url:N.p01, key:'plan_review'},
+      {text:'담당 인력·자문단 명단 업데이트', sub:'사업 착수 전', url:null, key:'staff_update'},
+      {text:'2월 사업공고 자료 사전 준비', sub:'포스터·현수막 초안 + 25개 구 담당자 최신화', url:N.p01, key:'feb_prep'}
     ],
     upcomingTasks:[
       {text:'유관기관 홍보·협조 공문 발송', sub:'2월 1주차', url:N.p02},
@@ -148,16 +187,16 @@ var PHASES = [
       {text:'담당 인력·자문단 명단 업데이트', sub:'1월', url:null}
     ],
     nowTasks:[
-      {text:'유관기관 홍보·협조 공문 발송', sub:'2월 1주차', urgent:true, url:N.p02},
-      {text:'시공업체 모집 공고 게시', sub:'2월 1주차', urgent:true, url:N.p04},
-      {text:'대상자 모집 공고 개시', sub:'2월~3월', url:N.p02},
-      {text:'시공업체 서류심사 및 면접', sub:'2월 4주차', url:N.p04},
-      {text:'전문가 자문단 위촉 완료', sub:'3월 중', url:null},
-      {text:'대상자 신청서류 취합 마감', sub:'3월 말~4월 초', url:N.p02}
+      {text:'유관기관 홍보·협조 공문 발송', sub:'2월 1주차', urgent:true, url:N.p02, key:'pr_letter'},
+      {text:'시공업체 모집 공고 게시', sub:'2월 1주차', urgent:true, url:N.p04, key:'contractor_recruit'},
+      {text:'대상자 모집 공고 개시', sub:'2월~3월', url:N.p02, key:'recruit_announce'},
+      {text:'시공업체 서류심사 및 면접', sub:'2월 4주차', url:N.p04, key:'contractor_screen'},
+      {text:'전문가 자문단 위촉 완료', sub:'3월 중', url:null, key:'advisor_appoint'},
+      {text:'대상자 신청서류 취합 마감', sub:'3월 말~4월 초', url:N.p02, key:'docs_collect'}
     ],
     upcomingTasks:[
-      {text:'현장심사 일정 조율', sub:'4월 1주차', url:N.p03},
-      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', url:N.p03}
+      {text:'현장심사 일정 조율', sub:'4월 1주차', url:N.p03, key:'field_schedule'},
+      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', url:N.p03, key:'field_visit'}
     ]
   },
   {
@@ -169,13 +208,13 @@ var PHASES = [
       {text:'전문가 자문단 위촉 완료', sub:'3월', url:null}
     ],
     nowTasks:[
-      {text:'현장심사 일정 조율 (가구별 예약)', sub:'4월 1주차', urgent:true, url:N.p03},
-      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', urgent:true, url:N.p03},
-      {text:'가구별 시공견적 산출', sub:'4월 말', urgent:true, url:N.p03}
+      {text:'현장심사 일정 조율 (가구별 예약)', sub:'4월 1주차', urgent:true, url:N.p03, key:'field_schedule'},
+      {text:'전체 신청 가구 현장방문 심사', sub:'4월 2~4주차', urgent:true, url:N.p03, key:'field_visit'},
+      {text:'가구별 시공견적 산출', sub:'4월 말', urgent:true, url:N.p03, key:'cost_estimate'}
     ],
     upcomingTasks:[
-      {text:'심사자료 작성 (점수 합산)', sub:'5월 1~2주차', url:N.p03},
-      {text:'최종 선정심사 회의', sub:'5월 셋째주', url:N.p03}
+      {text:'심사자료 작성 (점수 합산)', sub:'5월 1~2주차', url:N.p03, key:'score_compile'},
+      {text:'최종 선정심사 회의', sub:'5월 셋째주', url:N.p03, key:'final_review'}
     ]
   },
   {
@@ -188,13 +227,13 @@ var PHASES = [
       {text:'가구별 시공견적 산출 완료', sub:'4월 말', url:N.p03}
     ],
     nowTasks:[
-      {text:'심사자료 작성 — 서류+현장 점수 합산', sub:'5월 1~2주차', urgent:true, url:N.p03},
-      {text:'최종 선정심사 회의', sub:'5월 셋째주', urgent:true, url:N.p03},
-      {text:'선정 결과 통보 (대상가구 개별 통지)', sub:'심사 후', url:N.p03}
+      {text:'심사자료 작성 — 서류+현장 점수 합산', sub:'5월 1~2주차', urgent:true, url:N.p03, key:'score_compile'},
+      {text:'최종 선정심사 회의', sub:'5월 셋째주', urgent:true, url:N.p03, key:'final_review'},
+      {text:'선정 결과 통보 (대상가구 개별 통지)', sub:'심사 후', url:N.p03, key:'result_notify'}
     ],
     upcomingTasks:[
-      {text:'시공업체 계약 체결', sub:'6월 중', url:N.p04},
-      {text:'선정 가구 시공 일정 조율', sub:'6월', url:N.p05}
+      {text:'시공업체 계약 체결', sub:'6월 중', url:N.p04, key:'contract_sign'},
+      {text:'선정 가구 시공 일정 조율', sub:'6월', url:N.p05, key:'schedule_coord'}
     ]
   },
   {
@@ -205,14 +244,14 @@ var PHASES = [
       {text:'최종 선정심사 및 결과 통보 완료', sub:'5월', url:N.p03}
     ],
     nowTasks:[
-      {text:'시공업체 계약 체결', sub:'6월 중', urgent:true, url:N.p04},
-      {text:'선정 가구 시공 일정 조율·안내', sub:'6월 말까지', urgent:true, url:N.p05},
-      {text:'가구별 시공 내역 교차검증', sub:'시공 시작 전', url:N.p05},
-      {text:'시공 시작', sub:'6월 말', url:N.p05}
+      {text:'시공업체 계약 체결', sub:'6월 중', urgent:true, url:N.p04, key:'contract_sign'},
+      {text:'선정 가구 시공 일정 조율·안내', sub:'6월 말까지', urgent:true, url:N.p05, key:'schedule_coord'},
+      {text:'가구별 시공 내역 교차검증', sub:'시공 시작 전', url:N.p05, key:'cross_verify'},
+      {text:'시공 시작', sub:'6월 말', url:N.p05, key:'construction_start'}
     ],
     upcomingTasks:[
-      {text:'시공 현장 감리', sub:'7~10월', url:N.p05},
-      {text:'자재 적정성 확인', sub:'시공 중', url:N.p05}
+      {text:'시공 현장 감리', sub:'7~10월', url:N.p05, key:'supervision'},
+      {text:'자재 적정성 확인', sub:'시공 중', url:N.p05, key:'material_check'}
     ]
   },
   {
@@ -223,16 +262,16 @@ var PHASES = [
       {text:'시공 시작 완료', sub:'6월', url:N.p05}
     ],
     nowTasks:[
-      {text:'서울시 지도점검 대응', sub:'7월 1~2주 — 준비자료 목록 확인', urgent:true, url:N.p01},
-      {text:'2차(하반기) 보조금 교부 신청', sub:'지도점검 완료 후', urgent:true, url:N.p01},
-      {text:'시공 현장 감리 (건축사사무소 PM)', sub:'7~10월 시공 중', url:N.p05},
-      {text:'ADL·IADL 만족도 설문 착수', sub:'8월 — 완료 가구부터 순차 진행', url:N.p05},
-      {text:'시공 중 민원 응대', sub:'업체 단독 처리 금지 — 사무국 경유', url:N.p05},
-      {text:'숭실대 연구 착수 미팅', sub:'7~8월 중 — 연구주제·설문지 확정', url:N.p01}
+      {text:'서울시 지도점검 대응', sub:'7월 1~2주 — 준비자료 목록 확인', urgent:true, url:N.p01, key:'city_inspection'},
+      {text:'2차(하반기) 보조금 교부 신청', sub:'지도점검 완료 후', urgent:true, url:N.p01, key:'grant_2nd'},
+      {text:'시공 현장 감리 (건축사사무소 PM)', sub:'7~10월 시공 중', url:N.p05, key:'supervision'},
+      {text:'ADL·IADL 만족도 설문 착수', sub:'8월 — 완료 가구부터 순차 진행', url:N.p05, key:'survey_start'},
+      {text:'시공 중 민원 응대', sub:'업체 단독 처리 금지 — 사무국 경유', url:N.p05, key:'complaint_handle'},
+      {text:'숭실대 연구 착수 미팅', sub:'7~8월 중 — 연구주제·설문지 확정', url:N.p01, key:'research_meeting'}
     ],
     upcomingTasks:[
-      {text:'PM 현장방문 준공검사', sub:'10월 — 완료 업체부터 순차', url:N.p05},
-      {text:'시공 완료 가구 잔금 지급', sub:'10~11월', url:N.p01}
+      {text:'PM 현장방문 준공검사', sub:'10월 — 완료 업체부터 순차', url:N.p05, key:'completion_check'},
+      {text:'시공 완료 가구 잔금 지급', sub:'10~11월', url:N.p01, key:'final_payment'}
     ]
   },
   {
@@ -244,17 +283,17 @@ var PHASES = [
       {text:'ADL·IADL 설문 진행', sub:'8~9월 — 완료 가구 대상', url:N.p05}
     ],
     nowTasks:[
-      {text:'PM 현장방문 — 준공검사 (완료 업체부터 순차)', sub:'시공내역·자재·품질 확인', urgent:true, url:N.p05},
-      {text:'하자 발견 시 즉시 보완 지시 후 재확인', sub:'확인 완료 후 잔금 지급 승인', url:N.p05},
-      {text:'계약 변경 가구 — 준공정산합의서 작성', sub:'견적 변경 내역 쌍방 날인', url:N.p06},
-      {text:'시공 완료 확인서 (대상자 서명) 수령', sub:'잔금 지급 조건 서류', url:N.p06},
-      {text:'잔금 지급 — 세금계산서 수령 → 보탬e 등록 → 이체', sub:'11월 중순까지 전체 완료 목표', urgent:true, url:N.p01},
-      {text:'ADL·IADL 설문 완료 + 숭실대 데이터 전달', sub:'10월 말~11월 초 — 익명화 처리 후 전달', url:N.p05},
-      {text:'결과보고서 책자 원고 작성 + 인쇄 발주', sub:'11월 중 완료', url:N.p01}
+      {text:'PM 현장방문 — 준공검사 (완료 업체부터 순차)', sub:'시공내역·자재·품질 확인', urgent:true, url:N.p05, key:'completion_check'},
+      {text:'하자 발견 시 즉시 보완 지시 후 재확인', sub:'확인 완료 후 잔금 지급 승인', url:N.p05, key:'defect_fix'},
+      {text:'계약 변경 가구 — 준공정산합의서 작성', sub:'견적 변경 내역 쌍방 날인', url:N.p06, key:'contract_change'},
+      {text:'시공 완료 확인서 (대상자 서명) 수령', sub:'잔금 지급 조건 서류', url:N.p06, key:'completion_cert'},
+      {text:'잔금 지급 — 세금계산서 수령 → 보탬e 등록 → 이체', sub:'11월 중순까지 전체 완료 목표', urgent:true, url:N.p01, key:'final_payment'},
+      {text:'ADL·IADL 설문 완료 + 숭실대 데이터 전달', sub:'10월 말~11월 초 — 익명화 처리 후 전달', url:N.p05, key:'survey_done'},
+      {text:'결과보고서 책자 원고 작성 + 인쇄 발주', sub:'11월 중 완료', url:N.p01, key:'report_book'}
     ],
     upcomingTasks:[
-      {text:'지출마감 — 12/31 이전 전체 집행 완료', sub:'카드 결제일(23일) 확인 필수', url:N.p01},
-      {text:'보탬e 사업마감 처리', sub:'집행마감 → 정산검토 → 정산결과', url:N.p01}
+      {text:'지출마감 — 12/31 이전 전체 집행 완료', sub:'카드 결제일(23일) 확인 필수', url:N.p01, key:'expense_close'},
+      {text:'보탬e 사업마감 처리', sub:'집행마감 → 정산검토 → 정산결과', url:N.p01, key:'bhtm_close'}
     ]
   },
   {
@@ -265,12 +304,12 @@ var PHASES = [
       {text:'결과보고서 책자 제작 완료', sub:'11월', url:N.p01}
     ],
     nowTasks:[
-      {text:'지출마감 — 12/31 이전 전체 집행 완료', sub:'카드 결제일(23일) 주의', urgent:true, url:N.p01},
-      {text:'보탬e 사업마감 처리', sub:'집행마감 → 정산검토 → 정산결과 조회', urgent:true, url:N.p01},
-      {text:'결과보고서 책자 서울시 제출', sub:'12월 초', url:N.p01},
-      {text:'차년도 사업계획서 초안 작성 시작', sub:'통계수치 최신화 포함', url:N.p01},
-      {text:'외부 회계감사 일정 사전 조율', sub:'서울시 지정 감사인 연락 → 1월 일정 협의', url:N.p01},
-      {text:'지출 서류 편철 완료', sub:'지출결의서+증빙+이체확인서 순 정리', url:N.p06}
+      {text:'지출마감 — 12/31 이전 전체 집행 완료', sub:'카드 결제일(23일) 주의', urgent:true, url:N.p01, key:'expense_close'},
+      {text:'보탬e 사업마감 처리', sub:'집행마감 → 정산검토 → 정산결과 조회', urgent:true, url:N.p01, key:'bhtm_close'},
+      {text:'결과보고서 책자 서울시 제출', sub:'12월 초', url:N.p01, key:'report_submit_city'},
+      {text:'차년도 사업계획서 초안 작성 시작', sub:'통계수치 최신화 포함', url:N.p01, key:'next_plan'},
+      {text:'외부 회계감사 일정 사전 조율', sub:'서울시 지정 감사인 연락 → 1월 일정 협의', url:N.p01, key:'audit_schedule'},
+      {text:'지출 서류 편철 완료', sub:'지출결의서+증빙+이체확인서 순 정리', url:N.p06, key:'docs_filing'}
     ],
     upcomingTasks:[
       {text:'전문감사인 회계감사', sub:'1월 중 — 편철 상태 미리 정비', url:N.p01},
@@ -290,6 +329,1874 @@ var NOTION_PAGES = [
   {label:'07. 서류 작성 예시', id:'38103cfe058d8196a946c83a598a0ca1', gh:'07_%EC%84%9C%EB%A5%98%EC%9E%91%EC%84%B1%EC%98%88%EC%8B%9C.md'}
 ];
 
+var TASK_DETAILS = {
+  'audit': {
+    title: '전문감사인 회계감사 진행',
+    month: '1월',
+    summary: '서울시가 직접 지정한 전문감사인이 전년도 정산보고서의 적정성을 검증한다. 감사는 당일 1회 진행되며, 담당자는 서류 편철 및 지출 증빙 일체를 사전 준비해야 한다.',
+    sections: [
+      {
+        title: '감사인 지정',
+        type: 'info',
+        items: [
+          '서울시 재정담당관 공문으로 사전 통보 (전년도 11~12월 중)',
+          '2025년 선정 감사인: 미립회계법인 — 책임자 김병준 010-4009-8221'
+        ]
+      },
+      {
+        title: '진행 순서',
+        type: 'steps',
+        items: [
+          '12월 중 — 감사인에게 연락 → 1월 감사 일정 사전 협의',
+          '1월 중 — 서류 최종 편철 완료 + 감사 당일 준비',
+          '감사 완료 → 1월 3주 이내 공문으로 서울시 제출'
+        ]
+      },
+      {
+        title: '당일 준비 체크리스트',
+        type: 'checklist',
+        items: [
+          '전체 지출 서류 편철 완료 (지출결의서 + 증빙 + 이체확인서 순)',
+          '지출결의서 · 영수증 · 계좌이체 확인서 등 증빙 일체',
+          '보탬e 집행내역 출력본',
+          '사업 관련 계약서 일체'
+        ]
+      },
+      {
+        title: '수수료 기준 (보조금+자부담 합산)',
+        type: 'table',
+        headers: ['보조금 총액', '수수료(부가세 포함)'],
+        rows: [
+          ['3억~4억 미만', '1,100,000원'],
+          ['4억~5억 미만', '1,200,000원'],
+          ['5억~6억 미만', '1,300,000원'],
+          ['6억~7억 미만', '1,400,000원'],
+          ['7억~8억 미만', '1,500,000원'],
+          ['8억~9억 미만', '1,600,000원']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '감사인 일정을 12월에 잡지 않으면 1월 제출 마감에 쫓길 수 있음',
+          '서류 편철 상태가 불량하면 감사 시간이 크게 길어짐 → 12월 중 정리 완료 필수'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'bhtm_submit': {
+    title: '보탬e 실적보고서·정산보고서 서울시 제출',
+    month: '1월',
+    summary: '보탬e(지방보조금시스템)에서 전년도 집행내역을 마감하고 실적·정산보고서를 작성한 뒤, 외부 회계감사 완료 후 서울시에 공문으로 제출한다. 작성은 12월에 하고 제출은 1월.',
+    sections: [
+      {
+        title: '처리 흐름',
+        type: 'steps',
+        items: [
+          '보탬e 집행마감 처리 (메뉴 94001) — 12월 중',
+          '검토대상 목록조회 → 정산검토 의견조회 → 정산결과 조회',
+          '실적보고서 등록 (메뉴 94008) — 각 탭 순서대로 작성',
+          '외부 회계감사 완료 후 감사보고서 첨부',
+          '공문으로 서울시 제출 — 1월 3주 이내'
+        ]
+      },
+      {
+        title: '실적보고서 탭 구성',
+        type: 'table',
+        headers: ['탭', '입력 내용'],
+        rows: [
+          ['기본현황', '사업개요, 사업비, 교부결정일'],
+          ['계획대비실적', '목표 대비 실제 지원 가구 수'],
+          ['사업성과', '정성적 성과 서술'],
+          ['중요재산', '취득 재산 현황'],
+          ['정산보고서', '예산·집행 내역'],
+          ['감사보고서', '외부감사 결과 첨부'],
+          ['보고서 제출', '최종 제출']
+        ]
+      },
+      {
+        title: '제출 서류',
+        type: 'checklist',
+        items: [
+          '실적 및 정산보고서 (보탬e 양식)',
+          '지출 증빙서류 일체',
+          '외부 회계감사 보고서'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '집행마감 전에 모든 지출 건 입력 여부 재확인 필수 — 마감 후 추가 입력 불가',
+          '감사보고서 첨부 없이는 최종 제출 불가',
+          'ADL·IADL 만족도 점수를 시공 전·후 비교 표 형태로 작성해야 함 (수치만 나열 금지)'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'contest_apply': {
+    title: '서울시 공모 신청서류 준비 및 제출',
+    month: '1월',
+    summary: '이 사업은 매년 서울시 공모를 통해 수행기관을 새로 선정한다. 따뜻한동행은 매년 1월 방문접수로 신청서류를 제출해야 사업을 수행할 수 있다.',
+    sections: [
+      {
+        title: '공모 일정 (2026년 기준)',
+        type: 'table',
+        headers: ['단계', '일정'],
+        rows: [
+          ['공고', '1월 초 (예: 1. 5.)'],
+          ['접수', '1. 16.(금) ~ 1. 20.(화) 09:00~18:00'],
+          ['결과 통보', '2. 3.(화) 예정'],
+          ['사업기간', '2월~12월']
+        ]
+      },
+      {
+        title: '접수 방법',
+        type: 'info',
+        items: [
+          '방문접수 전용 — 팩스·우편·이메일 불가',
+          '접수처: 서울시청 본관 2층 장애인자립지원과 장애인편의증진팀 ☎ 02-2133-7461',
+          '담당자: 주무관 고다은'
+        ]
+      },
+      {
+        title: '제출 서류 (출력 15부 + USB)',
+        type: 'checklist',
+        items: [
+          '지방보조사업 지원신청서 (붙임① 양식)',
+          '단체소개서 사업실적 포함 (붙임② 양식)',
+          '사업계획서 (붙임③ 양식)',
+          '법인 정관·허가증·등록증 사본',
+          '이사회(임원회) 의결 회의록 사본 — 공모 신청 건 명시 필수',
+          '육아친화 단체 가점 서류 (해당 시)'
+        ]
+      },
+      {
+        title: '심사 3단계',
+        type: 'steps',
+        items: [
+          '1차 단체적격심사 — 현장실사 + 신청자격·서류 확인',
+          '2차 자체심사 — 서울시 사업부서 심사의견 제출',
+          '3차 종합심사 — 기관 대표 면접(PT) + 심사위원회 심의'
+        ]
+      },
+      {
+        title: '선정 후 의무사항',
+        type: 'checklist',
+        items: [
+          '협약 후 15일 이내 이행보증보험 가입 (자부담)',
+          '서울시 평생학습포털 지방보조금 교육 이수 → 교부신청서 제출 시 첨부'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '접수 마지막 날 혼잡 → 첫날 제출 권장',
+          '출력 15부 + USB 동시 준비 필수 — 하나라도 빠지면 접수 불가',
+          '이사회 의결 회의록에 공모 신청 건이 명시적으로 포함되어야 함'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'plan_review': {
+    title: '당해 연도 서울시 사업계획서 검토',
+    month: '1월',
+    summary: '서울시 공모 결과가 나온 뒤 지원심의 내역이 반영된 최종 사업계획서를 작성·제출한다. 전년도 파일을 복사해 수정하는 방식으로 진행한다.',
+    sections: [
+      {
+        title: '반드시 업데이트할 항목',
+        type: 'steps',
+        items: [
+          '사업배경 통계수치 최신화 — 장애인 인구·저소득 가구 수 등 공식 통계로 교체',
+          '전년도 대비 변경사항 기술 — 지원 가구 수·시공 범위·IoT 방식 등 달라진 점',
+          '보완점 서술 — 전년도 문제점 및 개선 방향 구체 기술',
+          '예산·인건비 등 심의결과 반영 항목 수정',
+          '맨 앞에 "전년도 대비 변경사항" 파트 삽입 필수'
+        ]
+      },
+      {
+        title: '통계 출처',
+        type: 'info',
+        items: [
+          '장애인통계연보 (보건복지부) — 매년 업데이트 여부 확인',
+          '서울시 장애인 현황 통계 (서울시 공식 발간)',
+          '저소득 장애인 가구 수 — 복지로·통계청 데이터 활용'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '통계수치를 전년도 그대로 쓰는 실수 잦음 — 최신화 필수',
+          '보완점을 형식적으로만 작성하면 PT 심사에서 지적될 수 있음',
+          '보조금 심의위원회 심의 결과가 반영된 내용으로 업데이트해야 함'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'staff_update': {
+    title: '담당 인력·자문단 명단 업데이트',
+    month: '1월',
+    summary: '사업 착수 전 사무국 담당 인력과 전문가 자문단 명단을 최신화한다. 교부신청서, 보탬e 등록, 서울시 제출 서류에 모두 반영되어야 하므로 사업계획서 제출 전에 완료해야 한다.',
+    sections: [
+      {
+        title: '담당 인력 구성',
+        type: 'table',
+        headers: ['역할', '담당자', '주요 업무'],
+        rows: [
+          ['책임관리자', '법인 대표 (강신욱)', '사업 총괄·서울시 협약 서명'],
+          ['실무책임자', '사업 팀장', '일정 관리·서울시 보고'],
+          ['실무담당자', '사업 담당자', '현장심사·서류 관리·보탬e 입력']
+        ]
+      },
+      {
+        title: '자문단 구성 기준',
+        type: 'info',
+        items: [
+          '건축사 또는 실내건축 전문가 — PM업체 소속 건축사로 겸임 가능',
+          '사회복지사 — 복지 욕구 평가 및 대상자 면담 담당',
+          '물리치료사 또는 작업치료사 — ADL 평가 및 기능 분석 담당',
+          '자문단 위촉은 3월 중으로 별도 진행'
+        ]
+      },
+      {
+        title: '업데이트 항목 체크리스트',
+        type: 'checklist',
+        items: [
+          '사무국 인력 변동 사항 확인 (신규·퇴직·역할 변경)',
+          '전문가 자문단 연임 의향 사전 확인 (전화 또는 문자)',
+          '명단 파일 최신화 (이름·연락처·소속·자격증번호)',
+          '사업계획서 내 인력 현황 항목 반영',
+          '보탬e 사업 등록 시 담당자 정보 입력 확인'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '자문단 위촉은 정식 서류(위촉장) 발급 필요 — 구두 합의만으로는 안 됨',
+          '청렴 이행서약서에 책임관리자·실무책임자 서명 필요 — 명단 확정 후 즉시 서명 받을 것'
+        ]
+      }
+    ],
+    notionUrl: null
+  },
+
+  'feb_prep': {
+    title: '2월 사업공고 자료 사전 준비',
+    month: '1월',
+    summary: '공모 결과가 2월 초에 나오면 즉시 대상자 모집을 시작해야 한다. 공백 기간이 매우 짧으므로 포스터·현수막 초안과 25개 구 담당자 연락처를 1월 중에 미리 준비해둔다.',
+    sections: [
+      {
+        title: '준비 체크리스트',
+        type: 'checklist',
+        items: [
+          '대상자 모집 공고문 초안 작성',
+          '홍보 포스터 초안 제작 (선정 확정 전 초안만 준비)',
+          '현수막 초안 제작',
+          '법인 홈페이지 게시 자료 준비',
+          '25개 구 구청 장애인 담당자 연락처 최신화',
+          '행정복지센터 안내 공문 초안 작성'
+        ]
+      },
+      {
+        title: '홍보 채널',
+        type: 'info',
+        items: [
+          '따뜻한동행 홈페이지 공지사항',
+          '25개 구 구청 장애인 담당자 → 주민센터 → 대상자 전달',
+          'SH주거복지사 협조 채널',
+          '아파트 동장 연결망'
+        ]
+      },
+      {
+        title: '홍보물 제작 업체',
+        type: 'table',
+        headers: ['업체', '연락처', '특징'],
+        rows: [
+          ['동작구립장애인보호작업장', '02-812-7176', '포스터 대량 인쇄 — 가격 저렴'],
+          ['디자인지 (김기천 대표)', '010-2772-8997', '대표 홍보물 디자인 — 퀄리티 높음'],
+          ['현수막지존', 'gzone45@naver.com', '현수막 전용 — 제작 빠름']
+        ]
+      },
+      {
+        title: '2025년 실제 공고 참고',
+        type: 'info',
+        items: [
+          '신청기간: 2025. 2. 17. ~ 3. 28. (6주)',
+          '신청방법: 거주지 관할 행정복지센터(동사무소) 접수',
+          '대상: 서울시 거주 장애인 200가구'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '25개 구 담당자 연락처가 매년 바뀜 → 1월 중 전화로 최신화 필수',
+          '선정 확정 전까지 포스터에 날짜·예산 등 확정 수치 기재 금지 — 확정 후 즉시 인쇄'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'pr_letter': {
+    title: '유관기관 홍보·협조 공문 발송',
+    month: '2월 1주차',
+    summary: '서울시 25개 구청·행정복지센터·복지관·임대아파트 관리사무소 등에 사업 안내 공문과 홍보물 PDF를 발송한다. 전년도 접수가 저조했던 지역은 유선 연락 및 방문 홍보를 병행한다.',
+    sections: [
+      {
+        title: '발송 대상 기관',
+        type: 'table',
+        headers: ['기관', '수량', '방법'],
+        rows: [
+          ['서울시청', '1개소', '공문 발송'],
+          ['25개 구청 장애인복지 담당', '25개소', '공문 + 홍보물 PDF'],
+          ['행정복지센터 (동사무소)', '약 426개소', '택배 포스터 발송'],
+          ['장애인·종합사회복지관', '약 50개소', '이메일 또는 택배'],
+          ['LH 아파트 단지', '약 29개소', '관리사무소 협조 요청'],
+          ['SH 아파트 단지', '약 10개소', '현수막 설치 협조 요청']
+        ]
+      },
+      {
+        title: '발송 방법별 내용',
+        type: 'table',
+        headers: ['구분', '내용'],
+        rows: [
+          ['공문 발송', '사업 안내 공문 + 홍보물 PDF 첨부'],
+          ['방문 홍보', '전년도 신청 저조 지역 유관기관 직접 방문'],
+          ['문자 발송 요청', '구청 협조 → 행정복지센터에서 대상가구 문자 발송']
+        ]
+      },
+      {
+        title: '준비 체크리스트',
+        type: 'checklist',
+        items: [
+          '전년도 구별 접수 현황 분석 — 저조 지역 사전 파악',
+          '공문 초안 작성 및 결재 완료',
+          '홍보물 PDF 최종본 준비',
+          '25개 구 담당자 연락처 최신화 완료 (1월 중 업데이트 확인)',
+          '택배 발송 주소 목록 정리 (홍보리스트 엑셀)'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '저소득 장애인 비율이 높은데 접수율이 낮은 지역이 매년 반복됨 → 집중 관리 필요',
+          '구 담당자 연락처는 매년 바뀌므로 1월에 확인한 명단 기준으로 발송'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81418817f2daf0790ccf'
+  },
+
+  'contractor_recruit': {
+    title: '시공업체 모집 공고 게시',
+    month: '2월 1주차',
+    summary: '따뜻한동행 홈페이지에 시공파트너 모집 공고를 게시하고 서류 접수를 진행한다. 모집 기간은 약 2주이며 이메일로 서류를 접수받는다.',
+    sections: [
+      {
+        title: '모집 개요',
+        type: 'table',
+        headers: ['항목', '내용'],
+        rows: [
+          ['공고 위치', '따뜻한동행 홈페이지 → [소식] → [공지사항]'],
+          ['모집 기간', '2월 1주차 ~ 2월 4주차 (약 2주)'],
+          ['서류 접수', 'dreamhouse@walktogether.or.kr'],
+          ['면접 심사', '2월 4주차 (서류 마감 후 1주 이내)']
+        ]
+      },
+      {
+        title: '선발 기준',
+        type: 'info',
+        items: [
+          '서울·수도권 소재 주택 환경개선 공사 전문업체 (실내건축·인테리어 등)',
+          '우대: 장애대응·BF·유니버설디자인 시공 경험',
+          '우대: 주거취약계층 시공 경험',
+          '우대: 장애인기업·여성기업·사회적기업·협동조합'
+        ]
+      },
+      {
+        title: '제출 서류 목록',
+        type: 'checklist',
+        items: [
+          '시공파트너 신청서 (소정양식) — 필수',
+          '업체 소개자료(지명원) — 필수',
+          '사업자등록증 — 필수',
+          '최근 3년 실적 증빙자료 — 필수 (계약서 또는 실적증명서)',
+          '면허증 (실내건축·시설물유지관리 등) — 해당 업체',
+          '자격증 (건축 관련 국가공인자격) — 해당 업체',
+          '장애인기업·여성기업·사회적기업 증명서 — 해당 업체'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '기존 파트너사는 신청서만 제출 — 나머지 서류는 기존 제출 자료 활용 가능',
+          '선발 후 사업 교육 필수 — 교육 미이수 업체는 계약 불가'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81ecaf70c71bfc46a640'
+  },
+
+  'recruit_announce': {
+    title: '대상자 모집 공고 개시',
+    month: '2~3월',
+    summary: '서울시 거주 저소득 장애인 가구를 대상으로 주거편의 지원 신청을 모집한다. 신청은 거주지 행정복지센터에서 방문 접수하며, 2월 중순부터 3월 말까지 6주간 진행된다.',
+    sections: [
+      {
+        title: '공고 채널',
+        type: 'checklist',
+        items: [
+          '서울시 홈페이지 공지',
+          '각 자치구 홈페이지 공지',
+          '따뜻한동행 홈페이지 → [소식] → [공지사항]',
+          'SNS 홍보 (따뜻한동행 공식 채널)',
+          '주민센터·임대주택·장애인복지시설 포스터 부착',
+          '보도자료 배포'
+        ]
+      },
+      {
+        title: '신청 자격',
+        type: 'info',
+        items: [
+          '서울시 거주 장애인 가구 (세대주 또는 세대원이 장애인)',
+          '기초생활수급자 또는 차상위계층',
+          '자가주택 소유 OR 임대주택 소유주가 개조를 허락한 경우',
+          '3년 이내 동 사업 수혜 이력 없는 가구'
+        ]
+      },
+      {
+        title: '신청 서류 — 주거편의 지원',
+        type: 'checklist',
+        items: [
+          '주거편의지원 신청서 (소정양식)',
+          '임대인(주택소유자) 동의서 — 임대주택 필수',
+          '개인정보 수집이용제공 동의서',
+          '주거환경개선비 자부담 동의서 — 차상위(중위소득 50~65%) 해당자만'
+        ]
+      },
+      {
+        title: '신청 서류 — 자격 증빙',
+        type: 'checklist',
+        items: [
+          '주민등록등본 — 필수',
+          '기초생활수급자 증명서 — 수급자',
+          '차상위계층 증명서 또는 한부모가족 증명서 — 해당자'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '3년 이내 중복신청자는 현장심사 대상에서 제외 → 서류 취합 시 사전 확인 필수',
+          '특정 구에 접수 몰릴 경우 타 지역 홍보 즉시 강화',
+          '매년 서울시 사업 지침 변경 여부 확인 후 신청서 양식·자격 기준 업데이트'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81418817f2daf0790ccf'
+  },
+
+  'contractor_screen': {
+    title: '시공업체 서류심사 및 면접',
+    month: '2월 4주차',
+    summary: '접수된 시공업체 서류를 검토하고 면접 심사를 진행해 최종 파트너사를 선발한다. 외부 전문가를 포함한 4~5인 심사위원이 100점 만점으로 평가한다.',
+    sections: [
+      {
+        title: '심사 절차',
+        type: 'steps',
+        items: [
+          '서류 접수 마감 → 서류 검토 (신청서·실적·자격 확인)',
+          '면접 대상 업체 확정 및 일정 안내',
+          '면접심사 진행 (4~5인 심사위원)',
+          '점수 집계 → 등급 분류 → 최종 선발',
+          '선발 업체 통보 + 사업 교육 실시'
+        ]
+      },
+      {
+        title: '면접 배점 기준',
+        type: 'table',
+        headers: ['평가 영역', '배점'],
+        rows: [
+          ['행정역량 (기업 체력, 법령 준수)', '24점'],
+          ['장애세대 대응 능력', '18점'],
+          ['보조사업 수행 경험', '18점'],
+          ['시공역량 (기술·자격·현장관리 등)', '40점'],
+          ['총점 기준', 'A: 80~100 / B: 70~79 / C: 60~69 / F: 60 미만']
+        ]
+      },
+      {
+        title: '심사위원 구성',
+        type: 'info',
+        items: [
+          '법인 내부 관계자 (사업 책임자)',
+          '외부 건축 전문가',
+          '외부 복지 전문가',
+          '장애인 당사자 자문위원',
+          '※ 심사위원은 매년 재구성 — 당해 연도 사업계획서에서 확인'
+        ]
+      },
+      {
+        title: '선발 후 조치',
+        type: 'checklist',
+        items: [
+          '사업 교육 실시 — 사업 목적·제출서류·시공 주의사항 설명',
+          '계약이행보증보험 가입 확인 (도급금액의 10%)',
+          '하자이행보증보험 가입 확인 (도급금액의 3%)',
+          '6월 대상가구 확정 후 계약 체결 일정 사전 안내'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '외부 위원 초빙으로 심사 공정성 확보 필수',
+          '교육 미이수 업체는 계약 불가 — 교육 참석 여부 반드시 확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81ecaf70c71bfc46a640'
+  },
+
+  'advisor_appoint': {
+    title: '전문가 자문단 위촉 완료',
+    month: '3월',
+    summary: '현장심사와 최종 선정심사에 참여할 전문가 자문단을 공식 위촉한다. 위촉장을 발급하고, 4~5월 일정을 사전에 조율해둔다.',
+    sections: [
+      {
+        title: '자문단 구성',
+        type: 'table',
+        headers: ['분야', '역할'],
+        rows: [
+          ['건축사 / 실내건축 전문가', '시공 견적 적정성·공사 범위 검토'],
+          ['사회복지사', '복지 욕구 평가 및 대상자 면담'],
+          ['물리치료사 또는 작업치료사', 'ADL 평가 및 기능 분석'],
+          ['장애인 당사자 위원', '당사자 관점 의견 제시']
+        ]
+      },
+      {
+        title: '위촉 절차',
+        type: 'steps',
+        items: [
+          '전년도 자문단 연임 의향 확인 (전화 또는 문자)',
+          '신규 위원 필요 시 섭외 진행',
+          '위촉장 작성 및 대표자 직인 날인',
+          '위촉장 발송 또는 전달',
+          '4~5월 현장심사·선정심사 일정 사전 조율'
+        ]
+      },
+      {
+        title: '준비 서류',
+        type: 'checklist',
+        items: [
+          '위촉장 (소정양식, 대표자 직인)',
+          '자문단 명단 업데이트 (이름·소속·연락처·자격증번호)',
+          '사업계획서 내 자문단 현황 항목 반영'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '구두 합의만으로는 자문단 구성 불가 — 위촉장 발급 필수',
+          '현장심사 일정(4월)이 시작되기 전에 반드시 완료해야 함'
+        ]
+      }
+    ],
+    notionUrl: null
+  },
+
+  'docs_collect': {
+    title: '대상자 신청서류 취합 마감',
+    month: '3월 말~4월 초',
+    summary: '행정복지센터로부터 접수된 신청서류를 취합하고 서류 검토를 완료한다. 자격 미달·중복신청·서류 누락 건을 사전에 걸러내어 현장심사 대상자 명단을 확정한다.',
+    sections: [
+      {
+        title: '서류 취합 절차',
+        type: 'steps',
+        items: [
+          '각 행정복지센터로부터 신청서류 접수 (이메일 또는 방문)',
+          '접수 현황 집계 — 구별 신청 가구 수 파악',
+          '서류 완결성 검토 — 누락 서류 해당 센터에 보완 요청',
+          '자격 검토 — 3년 이내 중복신청 여부 확인',
+          '최종 현장심사 대상자 명단 확정'
+        ]
+      },
+      {
+        title: '서류 검토 체크리스트',
+        type: 'checklist',
+        items: [
+          '주거편의지원 신청서 (소정양식)',
+          '개인정보 동의서 서명 여부',
+          '임대주택의 경우 임대인 동의서 포함 여부',
+          '자격 증빙 서류 (수급자 증명 또는 차상위 증명)',
+          '주민등록등본 (최근 발급본)',
+          '3년 이내 동 사업 수혜 이력 없는지 확인'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '3년 이내 중복신청자는 이 단계에서 제외 — 현장심사 전 반드시 확인',
+          '서류 누락 가구는 현장심사 전까지 보완 완료 요청',
+          '접수 저조 지역이 있으면 마감 전 추가 홍보 실시'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81418817f2daf0790ccf'
+  },
+
+  'field_schedule': {
+    title: '현장심사 일정 조율 (가구별 예약)',
+    month: '4월 1주차',
+    summary: '전체 신청 가구를 대상으로 현장방문 일정을 수립하고, 가구별 방문 시간을 사전 안내한다. 담당자별 방문 일정표를 작성하고 시공업체와 공유한다.',
+    sections: [
+      {
+        title: '준비 3단계',
+        type: 'steps',
+        items: [
+          'STEP 1 — 중복·부적격 가구 제외: 3년 이내 중복신청자 명단 확인 → 리스트 제외 + 미선정 안내',
+          'STEP 2 — 지역별 대상자·시공업체 1차 매칭: 인근 업체 배분 (장집사 가맹점 우선)',
+          'STEP 3 — 직원별 방문 일정 배정: 하루 평균 13~20가구 (아파트 밀집 지역 최대 20가구 / 빌라촌 13~15가구)'
+        ]
+      },
+      {
+        title: '방문 2~3일 전 체크리스트',
+        type: 'checklist',
+        items: [
+          '가구별 방문 일정표 작성 완료',
+          '대상가구에 방문 날짜·시간 사전 안내 (10~12시 예정, 유동 가능)',
+          '시공업체에 일정표 전달 완료',
+          '현장조사표 출력 준비'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '3년 이내 중복지원 데이터 엑셀 정합성 매년 확인 필수',
+          '첫 번째 가구 앞에서 시공업체와 합류 → 하루 종일 동행 원칙',
+          '전 직원 참여 권장 — 필요 시 인턴 채용 가능'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'field_visit': {
+    title: '전체 신청 가구 현장방문 심사',
+    month: '4월 2~4주차',
+    summary: '건축전문가(PM) + 시공파트너 + 공간복지팀 담당자가 함께 전체 신청 가구를 방문하여 현장조사표를 작성하고, 정성 평가를 진행한다.',
+    sections: [
+      {
+        title: '방문 구성',
+        type: 'info',
+        items: [
+          '건축전문가(PM) — 시공 가능 여부·견적 아이디어 도출',
+          '시공파트너 — 시공 적용 가능성 검토',
+          '공간복지팀 담당자 — 현장조사표 작성·대상자 상담'
+        ]
+      },
+      {
+        title: '현장에서 하는 일',
+        type: 'steps',
+        items: [
+          '주거환경 개선 필요 여부 및 시급성 확인',
+          '맞춤형 시공 아이디어 도출 (카탈로그 활용)',
+          '대상자와 우선순위 협의 (예산 한계 안내 포함)',
+          '시공견적(안) 1차 산출',
+          '현장 사진 촬영 (착공 전 비교용)',
+          'IoT 지원 가능 여부 확인 (단순형/고도화형 구분)'
+        ]
+      },
+      {
+        title: '정성 평가 기준',
+        type: 'table',
+        headers: ['등급', '기준', '점수'],
+        rows: [
+          ['A', '매우 시급, 효과 높음', '100점'],
+          ['B', '시급, 효과 보통', '90점'],
+          ['C', '보통', '80점'],
+          ['F', '부적합', '60점']
+        ]
+      },
+      {
+        title: '반드시 현장에서 안내할 것',
+        type: 'info',
+        items: [
+          '"이번 방문은 현황 파악 목적입니다. 당장 선정이 아닙니다."',
+          '"최종 선정 후 6월 말에 시공 일정을 개별 안내드립니다."'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '현장조사표 항목 빠짐없이 작성 필수',
+          '위생 문제·저장강박 가구는 별도 메모 → 복지관 연계 검토',
+          '시공 불가 환경은 현장에서 시공파트너와 협의 후 기록'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'cost_estimate': {
+    title: '가구별 시공견적 산출',
+    month: '4월 말',
+    summary: '현장방문 결과를 바탕으로 각 가구별 시공 내역과 견적을 산출한다. PM 건축사가 견적의 적정성을 검토하며, 최종 선정심사 회의 전까지 완료해야 한다.',
+    sections: [
+      {
+        title: '견적 산출 흐름',
+        type: 'steps',
+        items: [
+          '현장조사표 기반으로 시공업체가 1차 견적 작성',
+          'PM 건축사가 견적 적정성 검토 (자재·단가·범위)',
+          '과도한 견적은 시공업체에 조정 요청',
+          '가구별 최종 견적 확정 → 선정심사 자료에 첨부'
+        ]
+      },
+      {
+        title: '지원 영역별 주요 시공 항목',
+        type: 'table',
+        headers: ['영역', '주요 항목'],
+        rows: [
+          ['접근로·현관', '단차제거·경사로·핸드레일·도어락·LED센서등'],
+          ['거실', '단차제거·핸드레일·도배장판·안전손잡이'],
+          ['주방', '맞춤 싱크대·수전교체·가스자동차단기'],
+          ['침실', '도배장판·창호·문턱제거·단열·콘센트'],
+          ['화장실', '핸드레일·샤워의자·비데·방수·문폭확장·변기교체'],
+          ['기타 (IoT)', '전동커튼·스마트조명·원격제어 시스템']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '업체별 배분 가구 수·견적 총액 균형 확인 — 특정 업체 집중 시 재조정',
+          '예산 한도를 초과하는 견적은 우선순위에 따라 항목 축소',
+          'IoT 지원: 대상자 연령·디지털 역량 고려해 단순형/고도화형 구분 적용'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'score_compile': {
+    title: '심사자료 작성 — 서류+현장 점수 합산',
+    month: '5월 1~2주차',
+    summary: '각 구청이 산출한 서류심사 점수와 현장심사 정성 평가 점수를 합산하여 최종 선정심사 회의용 자료를 작성한다. 전체 신청 가구를 선정·논의·미선정으로 분류한다.',
+    sections: [
+      {
+        title: '점수 합산 구조',
+        type: 'table',
+        headers: ['구분', '내용', '만점'],
+        rows: [
+          ['서류심사 (구청)', '장애정도·소득·세대·거주환경·중복장애', '95점 + 가산 15점'],
+          ['현장심사 (법인PM)', '정성 평가 등급 (A/B/C/F)', '100점'],
+          ['합산', '서류 + 현장 점수 합산 후 순위 결정', '']
+        ]
+      },
+      {
+        title: '서류심사 주요 배점',
+        type: 'table',
+        headers: ['평가지표', '세부', '점수'],
+        rows: [
+          ['장애정도', '경증 / 중증', '10 / 20점'],
+          ['소득수준', '차상위 / 수급자', '20 / 25점'],
+          ['거주환경', '상 / 중 / 하', '10 / 20 / 25점'],
+          ['가산점', '고령(65+)·장애아동·아동양육', '각 5점']
+        ]
+      },
+      {
+        title: '자료 작성 체크리스트',
+        type: 'checklist',
+        items: [
+          '전체 신청 가구 점수 합산 완료',
+          '선정 / 논의 / 미선정 3분류로 정리',
+          '예비 가구 목록 별도 준비 (결원 대비)',
+          '심사위원용 출력본 준비 (전체 사례 PDF)'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '배점은 매년 서울시 지침 변경 가능 — 당해 사업계획서에서 반드시 확인',
+          '심사 당일 전체 471건 숙지 필요 — 심사위원 질의에 즉시 답변 가능해야 함'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'final_review': {
+    title: '최종 선정심사 회의',
+    month: '5월 셋째주',
+    summary: '서울시·따뜻한동행·건축전문가·사회복지 교수·장애인 당사자 자문위원이 참여하는 심사 회의. 합산 점수와 전문가 의견을 종합해 최종 지원 가구를 결정한다.',
+    sections: [
+      {
+        title: '회의 진행 순서',
+        type: 'steps',
+        items: [
+          '사무국에서 전체 개요 및 주요 케이스 발표',
+          '심사위원에게 선정·논의·미선정 사례 PDF 검토 시간 부여',
+          '심사위원 질의 및 의결',
+          '최종 선정 가구 확정 + 예비 순위 결정'
+        ]
+      },
+      {
+        title: '최종 선정 우선순위',
+        type: 'info',
+        items: [
+          '1순위: 서류+현장 합산 점수 상위 가구',
+          '2순위: 중증장애·중복장애 가구',
+          '3순위: 주거환경 열악·안전 문제 시급 가구',
+          '4순위: 지체·시각·뇌병변·발달장애 등 장애유형 균형 고려',
+          '5순위: 서울시 및 전문가 자문단 요구사항 반영'
+        ]
+      },
+      {
+        title: '당일 준비사항',
+        type: 'checklist',
+        items: [
+          '전체 가구 현장조사표·견적서 출력본 지참',
+          '심사위원별 사례 PDF 파일 배부',
+          '선정·논의·미선정 분류 자료 준비',
+          '예비 가구 목록 준비'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '"논의 가구 ↔ 미선정 가구" 순위가 뒤바뀌는 경우 있음 — 즉시 답변 준비 필수',
+          '심사위원은 매년 재구성 — 당해 연도 사업계획서에서 확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'result_notify': {
+    title: '선정 결과 통보 (대상가구 개별 통지)',
+    month: '5월 심사 후',
+    summary: '최종 선정심사 결과를 각 가구에 개별 통보한다. 선정 가구와 미선정 가구 모두 통보하며, 미선정 안내는 반드시 문자 기록을 남긴다.',
+    sections: [
+      {
+        title: '통보 절차',
+        type: 'steps',
+        items: [
+          '선정 가구: 유선 전화로 직접 안내 → 6월 시공 일정 사전 예고',
+          '미선정 가구: 유선 전화 → 부재 시 문자 발송',
+          '유선 안내 여부 무관하게 문자로 최종 결과 재전달 (증빙용)',
+          '예비 가구: 대기 순위 안내 + 결원 발생 시 연락 예정 고지'
+        ]
+      },
+      {
+        title: '통보 내용',
+        type: 'info',
+        items: [
+          '선정 가구: 선정 사실 + 시공 일정 안내 예정 시기 + 담당자 연락처',
+          '미선정 가구: 미선정 사실 + 사유 (간략) + 예비 여부',
+          '예비 가구: 예비 순위 + 결원 시 연락 사실'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '미선정 안내는 반드시 문자 기록 보존 — 민원 발생 시 증빙 자료',
+          '선정 여부를 구두로만 안내하면 나중에 분쟁 발생 가능'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d814da40bff8366669d4f'
+  },
+
+  'contract_sign': {
+    title: '시공업체 계약 체결',
+    month: '6월',
+    summary: '최종 선정 가구 확정 후 시공업체별로 계약서를 작성하고 날인한다. 계약서는 우편으로 주고받으며, 수신 확인까지 완료해야 계약 체결로 인정된다.',
+    sections: [
+      {
+        title: '계약 절차',
+        type: 'steps',
+        items: [
+          '5월에 요청한 최종 견적서 수령 확인',
+          '계약서 작성 → 법인 직인 날인 → 우편 발송',
+          '업체로부터 날인 완료 계약서 수신 확인',
+          '계약 서류 일체 수령 및 파일링'
+        ]
+      },
+      {
+        title: '수령 서류 체크리스트 (업체별)',
+        type: 'checklist',
+        items: [
+          '계약서 (날인 완료본)',
+          '본 견적서 (최종 확정)',
+          '비교견적서 2부',
+          '통장사본 (잔금 지급용)',
+          '사업자등록증',
+          '준공표 (가구별 공사 예정일 포함)'
+        ]
+      },
+      {
+        title: '보험 가입 확인',
+        type: 'checklist',
+        items: [
+          '계약이행보증보험 가입 확인서 수령 (도급금액의 10%)',
+          '하자이행보증보험 가입 확인서 수령 (도급금액의 3%)'
+        ]
+      },
+      {
+        title: 'PM 계약 (따뜻한동행주)',
+        type: 'info',
+        items: [
+          'PM 기관: 사회적기업 건축사사무소 따뜻한동행(주) — 100% 자회사',
+          '실제 계약 체결: 6월 (사업계획서 기준 3월 날짜로 소급 처리)',
+          'PM 업무: 견적 검토·자재 확인·현장방문·준공검사'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '26년부터 7월 1~2주 지도점검 의무화 — 6월 안에 계약 완료 필수 (점검 시 계약서 확인)',
+          '계약서 수신 확인 전까지 계약 미체결 상태 — 우편 추적 관리 필요'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81ecaf70c71bfc46a640'
+  },
+
+  'schedule_coord': {
+    title: '선정 가구 시공 일정 조율·안내',
+    month: '6월',
+    summary: '선정된 가구에 시공 담당 업체와 예상 시공 시기를 안내한다. 각 업체가 대상자와 직접 소통하여 구체적인 공사 일정을 조율하도록 한다.',
+    sections: [
+      {
+        title: '안내 절차',
+        type: 'steps',
+        items: [
+          '업체별 배분 가구 확정 → 각 업체에 담당 가구 명단 전달',
+          '업체가 대상자에게 직접 연락 → 공사 가능 일정 협의',
+          '업체로부터 가구별 준공표(공사 예정일) 수령',
+          '사무국에서 전체 일정 취합 → 진행 현황 모니터링'
+        ]
+      },
+      {
+        title: '시공 일정 기준',
+        type: 'info',
+        items: [
+          '시공 가능 기간: 6월 중순 ~ 10월 말',
+          '대부분 업체 실제 착공일: 7월 1일',
+          '시공 시작 최소 1주 전 대상자에게 일정 사전 안내 필수'
+        ]
+      },
+      {
+        title: '특수 상황 가구 선행 조치',
+        type: 'checklist',
+        items: [
+          '위생 문제 가구 — 특수청소·폐기물 처리 선행',
+          '저장강박 가구 — 지역 복지관 연계 후 시공',
+          'SH·LH 임대주택 — 공사승인 동의 일괄 처리 완료 확인'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '업체가 대상자와 소통하지 않으면 사무국으로 민원 집중됨 → 계약 시 소통 책임 명확히 고지',
+          '업체별 가구 수·견적 총액 균형이 맞는지 재확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'cross_verify': {
+    title: '가구별 시공 내역 교차검증',
+    month: '시공 시작 전',
+    summary: '시공업체가 제출한 견적서와 실제 시공 예정 내역을 사무국이 교차 확인한다. 과도하거나 불필요한 항목을 걸러내고, 계약 견적과 일치하는지 검증한다.',
+    sections: [
+      {
+        title: '검증 항목',
+        type: 'checklist',
+        items: [
+          '계약 견적서와 시공 예정 내역 일치 여부 확인',
+          '사전 승인되지 않은 자재·공종 포함 여부',
+          '예산 한도 초과 여부 확인',
+          '업체별 배분 가구 수·총 견적액 균형 검토',
+          '특수 상황 가구 선행 조치 완료 여부'
+        ]
+      },
+      {
+        title: '이상 발견 시 처리',
+        type: 'steps',
+        items: [
+          '해당 업체에 수정 요청 및 사유 설명',
+          '수정 견적서 재제출 요청',
+          '재확인 후 최종 승인',
+          '필요 시 PM 건축사에 적정성 재검토 요청'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '시공 시작 후 내역 변경은 준공정산합의서 필요 — 사전 검증이 더 중요',
+          '특정 업체 견적이 지나치게 높으면 가구 재배분 검토'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'construction_start': {
+    title: '시공 시작',
+    month: '6월 말',
+    summary: '계약 체결 및 내역 검증 완료 후 시공을 시작한다. 대부분 업체의 실제 착공일은 7월 1일이며, 시작 전 대상자에게 최소 1주 전 사전 안내가 필요하다.',
+    sections: [
+      {
+        title: '착공 전 최종 체크리스트',
+        type: 'checklist',
+        items: [
+          '계약서·보험 가입 확인 완료',
+          '가구별 시공 내역·일정 교차검증 완료',
+          '대상자에게 착공 1주 전 시공 일정 안내 완료',
+          '특수 상황 가구 선행 조치 완료',
+          'SH·LH 임대주택 공사승인 동의 완료'
+        ]
+      },
+      {
+        title: '시공 가능 기간',
+        type: 'info',
+        items: [
+          '시공 가능 기간: 6월 중순 ~ 10월 말',
+          '대부분 업체 착공일: 7월 1일',
+          '10월 PM 준공검사 역산 → 늦어도 9월 말까지 완료 목표'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '착공 전 사진 촬영 필수 — 결과보고서 비교 사진으로 활용',
+          '착공 후 내역 변경 시 반드시 사무국 사전 승인 후 진행'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'city_inspection': {
+    title: '서울시 지도점검 대응',
+    month: '7월 1~2주',
+    summary: '2026년부터 2차 보조금 교부 전 지도점검이 의무화됐다. 보조사업 담당 2명 + 서울시 공익감사단(건축) 1명이 방문하며, 모든 자료는 엑셀로 검증 가능하게 준비한다.',
+    sections: [
+      {
+        title: '준비자료 목록',
+        type: 'checklist',
+        items: [
+          '종사자(전직원) 현황 및 관리 서류',
+          '임·직원 보수일람표 및 수당지급 현황',
+          '보조금 집행내역 일체(엑셀) 및 퇴직금적립 현황',
+          '예산서(세입·세출명세서), 결산서',
+          '보조금 입·출금 통장 일체 (인건비·퇴직금적립통장 포함)',
+          '비품관리대장',
+          '보조금 카드 사용실적(엑셀)',
+          '수행사업 내역 및 집행예산(엑셀) — 사업계획서와 동일 편제',
+          '보험가입증서, 회계관계직원 재정보증 설정현황'
+        ]
+      },
+      {
+        title: '점검 분야',
+        type: 'table',
+        headers: ['분야', '주요 점검 항목'],
+        rows: [
+          ['인사·조직', '근로계약서·호봉획정·복무·수당지급기준'],
+          ['보조금 관리', '전용통장·카드 사용·보탬e 입력·지출결의서 일치'],
+          ['회계 일반', '예산서·결산서·증빙 적정성'],
+          ['사업 관리', '계획 정상추진·계획변경 승인·수혜자 관리'],
+          ['안전', '화재보험·차량운행일지·보험']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '26년부터 지도점검 통과 후에 2차 교부 신청 가능 — 점검 지연 = 교부 지연',
+          '모든 자료는 엑셀파일로 검증 가능하도록 준비 필수',
+          '6월 안에 시공업체 계약 완료 필수 (점검 시 계약서 확인)'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'grant_2nd': {
+    title: '2차(하반기) 보조금 교부 신청',
+    month: '7월 지도점검 완료 후',
+    summary: '지도점검 완료 후 하반기 보조금을 교부 신청한다. 1차 교부와 동일한 서류 5종에 상반기 집행내역서를 추가로 제출한다.',
+    sections: [
+      {
+        title: '제출 서류 (5종 + 집행내역서)',
+        type: 'checklist',
+        items: [
+          '사업계획서 (지방보조금 지원심의내역 반영)',
+          '청구서 (전용통장 사본 첨부)',
+          '지방보조사업자 관리카드 (최근 5년 보조금 현황)',
+          '청렴 이행서약서 (대표·책임관리자·실무책임자 서명)',
+          '결제전용카드 사본 (신한카드 9410-8101-3309-6350)',
+          '상반기 보조금 집행 내역서 (항목별 예산·집행·집행율)'
+        ]
+      },
+      {
+        title: '교부 금액 구조 (25년 기준)',
+        type: 'table',
+        headers: ['구분', '금액'],
+        rows: [
+          ['보조금 총액', '680,000천원'],
+          ['1차(상반기) 교부액', '326,200천원'],
+          ['2차(하반기) 교부 신청액', '353,800천원'],
+          ['자기부담', '100,000천원']
+        ]
+      },
+      {
+        title: '하반기 교부신청 내역 (25년 기준)',
+        type: 'info',
+        items: [
+          '인건비: 18,200천원 (기본급 × 6개월 + 명절수당)',
+          '홍보비: 15,000천원 (영상제작 + 책자발간)',
+          '시공비 잔금: 318,200천원',
+          '사무용품비: 1,000천원',
+          '회계감사비: 1,400천원'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '교부 신청액은 서울시 공문으로 하달됨 → 공문 수령 후 금액 확인 후 신청',
+          '지도점검 완료 전 교부 신청 불가 (26년 신규 지침)'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'supervision': {
+    title: '시공 현장 감리 (건축사사무소 PM)',
+    month: '7~10월',
+    summary: '건축사사무소 따뜻한동행(주)가 시공 현장을 정기 방문하여 자재 적정성·시공 품질·내역 일치 여부를 점검한다. 문제 발견 시 즉시 사무국에 보고한다.',
+    sections: [
+      {
+        title: 'PM 주요 업무',
+        type: 'table',
+        headers: ['업무', '내용'],
+        rows: [
+          ['자재 검토', '사전 승인된 자재 사용 여부 확인'],
+          ['현장방문', '시공 중 현장 점검 및 사진 기록'],
+          ['준공검사', '시공 완료 후 최종 검사 (10월~)'],
+          ['견적 검토', '계약 내역과 실제 시공 비교']
+        ]
+      },
+      {
+        title: '감리 시 확인 사항',
+        type: 'checklist',
+        items: [
+          '계약 견적서와 실제 시공 내역 일치',
+          '승인된 자재 사용 여부',
+          '마감 품질 (안전손잡이 고정·도배 마감 등)',
+          '중간 과정 사진 촬영 완료'
+        ]
+      },
+      {
+        title: '하자보수 기간',
+        type: 'table',
+        headers: ['공종', '보수 기간'],
+        rows: [
+          ['일반 공종 (도배·장판·설비 등)', '완료일로부터 1년'],
+          ['방수 공종', '완료일로부터 3년']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '시공 중 문제 발생 시 업체 단독 처리 금지 — 즉시 사무국 보고',
+          '결과보고서용 시공 전·후 사진 반드시 보관'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'survey_start': {
+    title: 'ADL·IADL 만족도 설문 착수',
+    month: '8월',
+    summary: '시공 완료 가구부터 순차적으로 ADL·IADL 만족도 설문을 시작한다. 숭실대 이성규 교수팀이 유선 전화로 진행하며, 시공 전·후 불편감 비교가 핵심이다.',
+    sections: [
+      {
+        title: '설문 진행 방식',
+        type: 'info',
+        items: [
+          '담당: 숭실대 이성규 교수팀 (유선 전화 설문)',
+          '시작: 시공 완료 가구부터 순차 시작 (7~8월 완료 가구 대상)',
+          '설문지 내용: 7월 숭실대 연구 착수 미팅에서 최종 확정',
+          '목표: 시공 전·후 불편감 평균 3점 이상 감소'
+        ]
+      },
+      {
+        title: '측정 항목',
+        type: 'table',
+        headers: ['구분', '내용', '척도'],
+        rows: [
+          ['ADL', '식사·이동·용변처리 등 일상생활 수행능력', '7점 리커트'],
+          ['IADL', '가사·외출·전화이용 등 수단적 일상생활', '7점 리커트'],
+          ['주거환경 불편감', '시공 전·후 공간별 불편감 비교', '7점 리커트']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '연락 안 되는 가구는 시공업체 통해 재시도',
+          '설문 거부 가구는 "응답 거부" 처리 — 강요 금지',
+          '10월 데이터 전달 목표 → 9월 내 최대한 완료 필요'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'complaint_handle': {
+    title: '시공 중 민원 응대',
+    month: '7~10월',
+    summary: '시공 중 대상자 민원이 발생하면 반드시 사무국을 경유하여 처리한다. 업체가 단독으로 처리하면 분쟁으로 번질 수 있으므로 사무국이 컨트롤 역할을 한다.',
+    sections: [
+      {
+        title: '민원 처리 원칙',
+        type: 'steps',
+        items: [
+          '대상자가 사무국에 직접 연락 → 내용 접수',
+          '사무국이 해당 업체에 상황 전달',
+          '업체가 직접 대상자 연락 → 해결 방안 협의',
+          '해결 완료 후 사무국에 결과 보고',
+          '필요 시 사무국 담당자 직접 현장 방문 중재'
+        ]
+      },
+      {
+        title: '주요 민원 유형',
+        type: 'info',
+        items: [
+          '공사 일정 지연 — 업체에 일정 재확인 요청',
+          '소음·먼지 등 생활 불편 — 공정 일정 조율',
+          '시공 품질 불만 — PM 현장방문 요청',
+          '업체 연락 안 됨 — 사무국이 직접 업체 컨택'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '업체 단독 처리 절대 금지 — 계약 시 소통 책임 명확히 고지',
+          '민원 내용과 처리 경과를 반드시 기록으로 남길 것'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'research_meeting': {
+    title: '숭실대 연구 착수 미팅',
+    month: '7~8월',
+    summary: '숭실대 이성규 교수팀과 당해 연도 연구 주제 및 설문지 내용을 확정한다. 데이터 제공 범위를 협의하고, 10월 말 데이터 전달 일정을 사전 조율한다.',
+    sections: [
+      {
+        title: '미팅 논의 내용',
+        type: 'checklist',
+        items: [
+          '올해 연구 주제 확정 (따뜻한동행 희망 방향 제안)',
+          '활용 데이터 범위 협의',
+          '설문지 내용 검토 및 확정',
+          '데이터 전달 일정 협의 (10월 말~11월 초 목표)'
+        ]
+      },
+      {
+        title: '연구 담당자',
+        type: 'info',
+        items: [
+          '숭실대학교 이성규 교수 (사회복지학과)',
+          '역할: 최종심사 심사위원 겸 연구 책임자',
+          '연구 결과물 수령: 12월~익년 1월 중'
+        ]
+      },
+      {
+        title: '데이터 전달 기준',
+        type: 'info',
+        items: [
+          'ADL·IADL 설문 결과 (시공 전·후 비교)',
+          '가구별 장애유형·주거유형·소득수준 기초 데이터',
+          '개인식별정보(성명·주소) 제외 — 익명화 처리 후 전달'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'completion_check': {
+    title: 'PM 현장방문 — 준공검사',
+    month: '10월 (완료 업체부터 순차)',
+    summary: '건축사사무소 따뜻한동행(주)가 시공 완료 가구를 현장 방문하여 계약 내역·자재·품질을 최종 검사한다. 하자 발견 시 보완 후 재확인하며, 통과 후에만 잔금 지급 승인.',
+    sections: [
+      {
+        title: '준공검사 점검 항목',
+        type: 'table',
+        headers: ['점검 항목', '내용'],
+        rows: [
+          ['시공 내역 일치', '계약 견적서·시공내역서와 실제 시공 비교'],
+          ['자재 적정성', '사전 승인된 자재 사용 여부'],
+          ['품질 상태', '마감 불량·안전손잡이 고정 등 기본 품질'],
+          ['사진 확보', '준공 상태 공간별 사진 촬영']
+        ]
+      },
+      {
+        title: '하자 발견 시 처리',
+        type: 'steps',
+        items: [
+          '즉시 해당 업체에 보완 지시',
+          '보완 완료 후 재방문 또는 사진으로 확인',
+          '확인 완료 후 사무국에 잔금 지급 승인 통보'
+        ]
+      },
+      {
+        title: '잔금 지급 조건 서류 (업체별)',
+        type: 'checklist',
+        items: [
+          '세금계산서 (잔금 금액 기준)',
+          '가구별 시공 전·후 사진 (공간별 전부)',
+          '시공 완료 확인서 (대상자 서명)',
+          '준공정산합의서 (계약 변경 있는 경우만)',
+          '만족도 조사지 (시공 전·후)'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '전체 가구 방문 점검 누락 없이 실시 필수',
+          '하자보증보험 유효기간 관리 — 만료 전 갱신 확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'defect_fix': {
+    title: '하자 발견 시 즉시 보완 지시 후 재확인',
+    month: '10~11월',
+    summary: '준공검사에서 하자가 발견되면 즉시 해당 업체에 보완을 지시한다. 보완 완료 후 재방문 또는 사진으로 확인하며, 확인 전까지 잔금 지급을 보류한다.',
+    sections: [
+      {
+        title: '하자 처리 절차',
+        type: 'steps',
+        items: [
+          'PM 현장검사에서 하자 항목 기록',
+          '해당 시공업체에 즉시 보완 지시 (서면 또는 문자)',
+          '업체 보완 완료 후 사무국에 완료 보고',
+          'PM 재방문 또는 사진 확인으로 보완 여부 검증',
+          '확인 완료 후 잔금 지급 승인'
+        ]
+      },
+      {
+        title: '주요 하자 유형',
+        type: 'info',
+        items: [
+          '안전손잡이·핸드레일 고정 불량',
+          '도배·장판 마감 불량 (들뜸·주름)',
+          '방수 처리 미흡',
+          '계약 내역과 다른 자재 사용',
+          '시공 항목 누락'
+        ]
+      },
+      {
+        title: '하자보수 기간',
+        type: 'table',
+        headers: ['공종', '보수 기간'],
+        rows: [
+          ['일반 공종', '시공 완료일로부터 1년'],
+          ['방수 공종', '시공 완료일로부터 3년']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '보완 지시 내용과 일자를 반드시 문서화',
+          '재확인 없이 잔금 지급 금지'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'contract_change': {
+    title: '계약 변경 가구 — 준공정산합의서 작성',
+    month: '10~11월',
+    summary: '계약 당시 견적과 실제 시공 내역이 다른 경우(자재 변경·시공 범위 증감) 준공정산합의서를 작성하고 쌍방 날인한다.',
+    sections: [
+      {
+        title: '작성 기준',
+        type: 'info',
+        items: [
+          '계약 견적과 실제 시공 내역이 다른 경우 필수',
+          '금액 증감 내역 명시 (증액·감액 항목별)',
+          '시공업체 + 사무국(법인) 쌍방 날인'
+        ]
+      },
+      {
+        title: '작성 절차',
+        type: 'steps',
+        items: [
+          '변경 내역 확인 (계약 견적서 vs 실제 시공 내역서 비교)',
+          '준공정산합의서 작성 (변경 사유·항목·금액 기재)',
+          '시공업체 날인',
+          '법인(사무국) 날인',
+          '잔금 지급 서류에 포함하여 보관'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '합의서 없이 잔금 지급하면 감사 시 문제 발생',
+          '금액이 증가한 경우 예산 잔액 확인 후 처리'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81b98c5ee6b2b88fbe3e'
+  },
+
+  'completion_cert': {
+    title: '시공 완료 확인서 (대상자 서명) 수령',
+    month: '10~11월',
+    summary: '시공이 완료된 가구의 대상자로부터 "시공 완료 확인서"에 직접 서명을 받는다. 잔금 지급의 필수 조건 서류다.',
+    sections: [
+      {
+        title: '서명 받는 방법',
+        type: 'steps',
+        items: [
+          '시공업체가 시공 완료 후 대상자에게 확인서 서명 요청',
+          '대상자가 직접 서명 (대리인 불가 원칙)',
+          '서명된 확인서 사무국에 원본 제출',
+          '잔금 지급 서류 묶음에 포함하여 보관'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '대상자 서명 없이는 잔금 지급 불가',
+          '대상자 연락 불가·서명 거부 시 사무국에 즉시 보고 후 협의'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81b98c5ee6b2b88fbe3e'
+  },
+
+  'final_payment': {
+    title: '잔금 지급 — 세금계산서 → 보탬e 등록 → 이체',
+    month: '10~11월 (11월 중순까지 완료)',
+    summary: 'PM 준공검사 완료 후 업체별로 잔금을 지급한다. 세금계산서 수령 → 지출결의서 작성 → 보탬e 집행 등록 → 계좌 이체 순서로 처리한다.',
+    sections: [
+      {
+        title: '잔금 지급 절차',
+        type: 'steps',
+        items: [
+          '업체로부터 세금계산서 수령 (잔금 금액 기준)',
+          '지출결의서 작성',
+          '보탬e 집행 등록',
+          '계좌 이체 (업체 통장으로)',
+          '이체 확인서 출력 → 지출 서류 편철'
+        ]
+      },
+      {
+        title: '잔금 지급 조건 서류 (전체 수령 후 지급)',
+        type: 'checklist',
+        items: [
+          '준공검사 완료 (PM 확인)',
+          '세금계산서',
+          '시공 전·후 사진 (공간별)',
+          '시공 완료 확인서 (대상자 서명)',
+          '준공정산합의서 (변경 가구만)',
+          '만족도 조사지'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '11월 중순까지 전체 완료 목표 — 지연 시 12월 지출마감 위험',
+          '서울시 2차 보조금 교부액 범위 내에서 지급 — 예산 잔액 확인 필수',
+          '세금계산서와 지출결의서 금액 반드시 일치 확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'survey_done': {
+    title: 'ADL·IADL 설문 완료 + 숭실대 데이터 전달',
+    month: '10월 말~11월 초',
+    summary: '전체 시공 완료 가구의 만족도 설문을 완료하고, 익명화 처리 후 숭실대 이성규 교수팀에 데이터를 전달한다.',
+    sections: [
+      {
+        title: '데이터 전달 내용',
+        type: 'checklist',
+        items: [
+          'ADL·IADL 설문 결과 (시공 전·후 비교)',
+          '가구별 장애유형·주거유형·소득수준 기초 데이터',
+          '시공 전·후 불편감 점수 (7점 리커트)',
+          '개인식별정보(성명·주소 등) 제외 — 익명화 처리'
+        ]
+      },
+      {
+        title: '전달 후 일정',
+        type: 'info',
+        items: [
+          '숭실대 가공 → 연구 결과보고서 작성',
+          '결과물 수령: 12월~익년 1월 중',
+          '결과보고서 책자·실적보고서에 수치 반영'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '개인정보 포함 데이터 전달 금지 — 반드시 익명화 후 전달',
+          '설문 미완료 가구 있으면 데이터 전달 전 재시도 필요'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  },
+
+  'report_book': {
+    title: '결과보고서 책자 원고 작성 + 인쇄 발주',
+    month: '11월',
+    summary: '당해 연도 사업 결과를 담은 인쇄용 책자를 제작한다. 가구당 1면 구성으로 시공 전·후 사진과 만족도 수치가 핵심이다. 서울시 결과보고 시 제출하고 유관기관에 배포한다.',
+    sections: [
+      {
+        title: '제작 일정',
+        type: 'table',
+        headers: ['단계', '내용', '시기'],
+        rows: [
+          ['원고 작성', '가구별 내용 정리 (사진·특성·시공내용)', '11월 1~2주'],
+          ['디자인', '디자인지(김기천 대표 010-2772-8997) 의뢰', '11월 2~3주'],
+          ['교정·검토', '내용·사진 오류 확인', '11월 3주'],
+          ['인쇄 발주', '동작구립장애인보호작업장 02-812-7176', '11월 3~4주'],
+          ['수령 및 배포', '서울시 + 유관기관 + 법인 내부', '12월 초']
+        ]
+      },
+      {
+        title: '책자 가구당 구성 (1면)',
+        type: 'checklist',
+        items: [
+          '대상자 특성: 가구원 구성·장애유형·소득수준',
+          '시공 내용: 영역별 주요 시공 항목 요약',
+          '시공 전·후 사진: 최소 공간 2곳 이상',
+          'ADL·IADL 만족도 수치 (전·후 비교)'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '시공 전 사진 없으면 책자 제작 불가 — 현장심사·착공 전 반드시 확보',
+          '2026년: 도면 리터치(Color) 제외 → 사진 중심 구성',
+          '대상자 개인정보 표기 여부 동의 확인 필수'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'expense_close': {
+    title: '지출마감 — 12/31 이전 전체 집행 완료',
+    month: '12월',
+    summary: '12월 31일 이전 모든 지출 집행을 완료하고 보탬e에서 집행마감 처리한다. 마감 후에는 추가 입력이 불가하므로, 마감 전 모든 지출 건 등록을 완료해야 한다.',
+    sections: [
+      {
+        title: '마감 전 체크리스트',
+        type: 'checklist',
+        items: [
+          '잔금 미지급 업체 전부 집행 완료 여부 확인',
+          '인건비·홍보비·운영비 등 잔여 예산 집행 가능 항목 재확인',
+          '보탬e 지방보조금카드 미결제 건 없는지 확인',
+          '카드 결제일(23일) — 12월분 마감 전 처리 필수',
+          '보탬e 집행 미등록 지출 건 없는지 재확인'
+        ]
+      },
+      {
+        title: '집행마감 처리',
+        type: 'steps',
+        items: [
+          '보탬e 접속 → 정산관리 → 집행마감(메뉴 94001)',
+          '마감 처리 클릭',
+          '마감 완료 확인 (이후 추가 입력 불가)',
+          '마감 결과 출력 보관'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '보탬e 카드 결제일 23일 → 12월 23일 이전 모든 카드 사용 건 확인 필수',
+          '집행마감 후에는 추가 입력 절대 불가 — 신중하게 처리'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'bhtm_close': {
+    title: '보탬e 사업마감 처리',
+    month: '12월',
+    summary: '보탬e에서 당해 연도 사업을 공식 마감한다. 집행마감 후 정산검토·정산결과까지 순서대로 처리해야 하며, 외부 감사를 위한 사전 준비도 병행한다.',
+    sections: [
+      {
+        title: '처리 흐름',
+        type: 'steps',
+        items: [
+          '집행마감 (메뉴 94001) — 모든 지출 등록 완료 후',
+          '검토대상 목록조회',
+          '정산검토 의견조회',
+          '정산결과 목록조회',
+          '정산결과 조회 확인'
+        ]
+      },
+      {
+        title: '병행 준비사항',
+        type: 'checklist',
+        items: [
+          '지출 서류 편철 완료 (지출결의서+증빙+이체확인서 순)',
+          '실적보고서 초안 작성 시작 (메뉴 94008)',
+          '외부 회계감사 일정 사전 조율 (감사인에게 1월 일정 협의)'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '12월에 마감 처리만 하고 서울시 제출은 1월 (외부감사 완료 후)',
+          '민간회계사 정산검토 일정 미리 잡아두지 않으면 1월 제출 지연'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'report_submit_city': {
+    title: '결과보고서 책자 서울시 제출',
+    month: '12월 초',
+    summary: '11월에 제작한 결과보고서 책자를 서울시에 제출한다. 서울시 담당자에게 직접 전달하며, 유관기관과 법인 내부에도 배포한다.',
+    sections: [
+      {
+        title: '제출 방법',
+        type: 'info',
+        items: [
+          '제출처: 서울시청 본관 2층 장애인자립지원과 장애인편의증진팀',
+          '담당자: 주무관 고다은 (☎ 02-2133-7461)',
+          '제출 시기: 12월 초 (책자 수령 후 즉시)'
+        ]
+      },
+      {
+        title: '배포 체크리스트',
+        type: 'checklist',
+        items: [
+          '서울시 제출 완료',
+          '유관기관 배포 (복지관·구청 등)',
+          '법인 내부 보관용'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '책자 수령일(11월 말~12월 초)과 제출 마감일 사전 확인',
+          '제출 부수는 서울시 담당자에게 사전 확인'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'next_plan': {
+    title: '차년도 사업계획서 초안 작성 시작',
+    month: '12월',
+    summary: '전년도 파일을 복사하여 차년도 사업계획서 작성을 시작한다. 통계수치 최신화와 당해 연도 보완사항 반영이 핵심이다.',
+    sections: [
+      {
+        title: '12월 중 업데이트 항목',
+        type: 'steps',
+        items: [
+          '전년도 사업계획서 파일 복사',
+          '사업배경 통계수치 최신화 (장애인통계연보 신규 발간 확인)',
+          '지원 가구 수 조정 (서울시 내년도 방향 파악 후)',
+          '당해 연도 보완사항 정리 → 개선점 다음 연도 계획에 반영',
+          '전년도 대비 변경사항 파트 초안 작성'
+        ]
+      },
+      {
+        title: '통계 출처',
+        type: 'info',
+        items: [
+          '장애인통계연보 (보건복지부) — 매년 발간 확인',
+          '서울시 장애인 현황 통계 (서울시 공식 발간)',
+          '저소득 장애인 가구 수 — 복지로·통계청'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '통계수치 전년도 그대로 사용 금지 — 최신화 필수',
+          '예산심의위원회 피드백(기업 후원 확대 등) 반영 검토'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'audit_schedule': {
+    title: '외부 회계감사 일정 사전 조율',
+    month: '12월',
+    summary: '서울시가 지정한 전문감사인과 1월 감사 일정을 사전에 협의한다. 감사 일정이 늦어지면 1월 제출 마감을 놓칠 수 있으므로 12월 중 확정한다.',
+    sections: [
+      {
+        title: '조율 절차',
+        type: 'steps',
+        items: [
+          '서울시 재정담당관 공문으로 감사인 사전 통보 (11~12월 중)',
+          '통보 즉시 감사인에게 연락 → 1월 감사 일정 협의',
+          '감사 일정 확정 후 서류 편철 완료 목표 역산',
+          '12월 중 전체 지출 서류 편철 완료'
+        ]
+      },
+      {
+        title: '감사인 정보',
+        type: 'info',
+        items: [
+          '2025년 선정 감사인: 미립회계법인 — 김병준 010-4009-8221',
+          '감사인은 매년 서울시가 새로 지정 — 공문으로 확인',
+          '수수료: 보조금 총액 기준 (6억~7억: 1,400,000원)'
+        ]
+      },
+      {
+        title: '12월 중 편철 준비',
+        type: 'checklist',
+        items: [
+          '전체 지출 서류 연도별 편철 완료',
+          '지출결의서 + 증빙 + 계좌이체 확인서 순서대로 정리',
+          '계약서 일체 별도 파일링'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '감사 일정 12월에 잡지 않으면 1월 제출 마감에 쫓길 수 있음',
+          '서류 편철 상태 불량 → 감사 시간 길어짐 → 12월 중 완료 필수'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81828aa0f4591d9a9f77'
+  },
+
+  'docs_filing': {
+    title: '지출 서류 편철 완료',
+    month: '12월',
+    summary: '당해 연도 전체 지출 서류를 순서대로 편철하여 외부 감사 및 보관에 대비한다. 지출결의서 + 증빙 + 이체확인서 순서로 정리하며 계약서는 별도 파일링한다.',
+    sections: [
+      {
+        title: '편철 순서',
+        type: 'steps',
+        items: [
+          '항목별 지출결의서 순서 정렬',
+          '각 결의서에 증빙서류 부착 (영수증·세금계산서 등)',
+          '계좌이체 확인서 첨부',
+          '항목별 묶음 후 연도·항목 라벨 부착',
+          '계약서 일체 별도 파일링'
+        ]
+      },
+      {
+        title: '편철 항목 구성',
+        type: 'table',
+        headers: ['항목', '포함 서류'],
+        rows: [
+          ['인건비', '급여대장·통장사본·이체확인서'],
+          ['시공비', '계약서·세금계산서·결의서·이체확인서'],
+          ['홍보비', '견적서·세금계산서·결의서'],
+          ['운영비', '영수증·카드영수증·결의서']
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '편철 상태가 불량하면 감사 시간이 크게 길어짐 — 12월 중 완료 필수',
+          '간이세금계산서 사용 여부 점검 — 감사 지적 사항'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d81b98c5ee6b2b88fbe3e'
+  },
+
+  'material_check': {
+    title: '자재 적정성 확인',
+    month: '시공 중 (7~10월)',
+    summary: '시공 중 사용되는 자재가 사전에 승인된 규격·품질에 맞는지 PM이 확인한다. 미승인 자재 사용 발견 시 즉시 교체를 요청한다.',
+    sections: [
+      {
+        title: '확인 방법',
+        type: 'info',
+        items: [
+          'PM 현장방문 시 자재 현물 확인',
+          '계약서·견적서에 명시된 자재 규격과 비교',
+          '사진 촬영으로 기록 보관'
+        ]
+      },
+      {
+        title: '주의사항',
+        type: 'warning',
+        items: [
+          '미승인 자재 발견 시 즉시 사무국 보고 후 교체 지시',
+          '자재 변경 시 견적 변경도 수반됨 — 준공정산합의서 필요'
+        ]
+      }
+    ],
+    notionUrl: 'https://notion.so/38103cfe058d818bba85ed13f041b2b6'
+  }
+
+};
+
 var today = new Date();
 var currentMonth = today.getMonth() + 1;
 var selectedMonth = currentMonth;
@@ -302,6 +2209,13 @@ function getPhase(m) {
 function taskHtml(t, dotCls, isUpcoming) {
   var subCls = (!isUpcoming && t.urgent) ? ' urgent' : '';
   var textStyle = isUpcoming ? 'font-size:12px;color:#555;' : '';
+  if (t.key && TASK_DETAILS[t.key]) {
+    return '<li><div class="task-item task-detail-btn" onclick="openPanel(\'' + t.key + '\')">' +
+      '<div class="task-dot ' + dotCls + '"></div>' +
+      '<div class="task-body"><div class="task-text" style="' + textStyle + '">' + t.text + '</div>' +
+      '<div class="task-sub' + subCls + '">' + t.sub + '</div></div>' +
+      '<div class="detail-arrow">›</div></div></li>';
+  }
   if (t.url) {
     return '<li><a href="' + t.url + '" target="_blank" class="task-link">' +
       '<div class="task-dot ' + dotCls + '"></div>' +
@@ -387,6 +2301,56 @@ function selectMonth(m) {
 
 function resetToToday() { selectMonth(currentMonth); }
 
+function openPanel(key) {
+  var d = TASK_DETAILS[key];
+  if (!d) return;
+  var html = '';
+  html += '<div class="panel-summary">' + d.summary + '</div>';
+  (d.sections || []).forEach(function(sec) {
+    html += '<div class="panel-section">';
+    html += '<div class="panel-section-title">' + sec.title + '</div>';
+    if (sec.type === 'steps') {
+      html += '<ol class="panel-steps">';
+      sec.items.forEach(function(item){ html += '<li>' + item + '</li>'; });
+      html += '</ol>';
+    } else if (sec.type === 'checklist') {
+      html += '<ul class="panel-checks">';
+      sec.items.forEach(function(item){ html += '<li>' + item + '</li>'; });
+      html += '</ul>';
+    } else if (sec.type === 'info') {
+      html += '<ul class="panel-info">';
+      sec.items.forEach(function(item){ html += '<li>' + item + '</li>'; });
+      html += '</ul>';
+    } else if (sec.type === 'warning') {
+      html += '<ul class="panel-warns">';
+      sec.items.forEach(function(item){ html += '<li>' + item + '</li>'; });
+      html += '</ul>';
+    } else if (sec.type === 'table') {
+      html += '<table class="panel-table"><thead><tr>';
+      sec.headers.forEach(function(h){ html += '<th>' + h + '</th>'; });
+      html += '</tr></thead><tbody>';
+      sec.rows.forEach(function(row){ html += '<tr>'; row.forEach(function(c){ html += '<td>' + c + '</td>'; }); html += '</tr>'; });
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+  });
+  var panel = document.getElementById('detailPanel');
+  panel.querySelector('.panel-title').textContent = d.title;
+  panel.querySelector('.panel-month').textContent = d.month;
+  panel.querySelector('.panel-body').innerHTML = html;
+  var footer = panel.querySelector('.panel-footer');
+  footer.innerHTML = d.notionUrl ? '<a href="' + d.notionUrl + '" target="_blank" class="panel-footer pf-notion">📋 노션에서 보기 ↗</a>' : '';
+  document.getElementById('panelOverlay').classList.add('open');
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePanel() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 function init() {
   today = new Date();
   currentMonth = today.getMonth() + 1;
@@ -414,5 +2378,18 @@ function init() {
 
 init();
 </script>
+
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-title" id="panelTitle"></div>
+      <div class="panel-month" id="panelMonth"></div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-footer" id="panelFooter"></div>
+</div>
 </body>
 </html>
